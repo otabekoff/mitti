@@ -46,6 +46,11 @@ jobs:
       - name: Create Windows Portable ZIP
         run: Compress-Archive -Path dist/mitti.exe, LICENSE, README.md, examples -DestinationPath dist/mitti-windows-x64.zip -Force
 
+      - name: Install NSIS
+        run: |
+          choco install nsis -y
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+
       - name: Compile NSIS Installer
         run: makensis installer/mitti.nsi
 
@@ -84,6 +89,9 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install dependencies
+        run: bun install
+
       - name: Build standalone binary
         run: |
           mkdir -p dist
@@ -92,7 +100,9 @@ jobs:
 
       - name: Create tarball
         run: |
-          tar -czvf dist/${{ matrix.artifact }}.tar.gz -C dist mitti LICENSE README.md examples
+          cp dist/mitti .
+          tar -czvf dist/${{ matrix.artifact }}.tar.gz mitti LICENSE README.md examples
+          rm mitti
 
       - name: Upload Unix Artifacts
         uses: actions/upload-artifact@v4
@@ -115,6 +125,7 @@ jobs:
       - name: Package VSIX
         run: |
           mkdir -p dist
+          cp LICENSE editors/vscode/
           cd editors/vscode
           npx --yes @vscode/vsce package --no-dependencies --out ../../dist/mitti-vscode-1.0.0.vsix
 
@@ -150,3 +161,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
