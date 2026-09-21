@@ -1,0 +1,26 @@
+{
+  "name": "mitti-lang",
+  "version": "0.1.0",
+  "description": "Mitti — oddiy, tez, Python-uslub interpreted programming language",
+  "main": "dist/main.js",
+  "bin": {
+    "mitti": "dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/main.ts",
+    "dev": "tsx src/main.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitepress": "^2.0.0-alpha.20"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
