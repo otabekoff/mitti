@@ -11,6 +11,8 @@ import { startLanguageServer } from "./lsp/server.js";
 import { Compiler } from "./vm/compiler.js";
 import { VM } from "./vm/vm.js";
 import { disassemble } from "./vm/disassembler.js";
+import { WasmCompiler } from "./wasm/compiler.js";
+import { runWasm } from "./wasm/runner.js";
 
 function runSource(src: string, interp: Interpreter) {
   const tokens = new Lexer(src).tokenize();
@@ -47,7 +49,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.6 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v1.0 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -156,19 +158,21 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
 } else if (args[0] === "-v" || args[0] === "--version") {
-  console.log("Mitti v0.6.0");
+  console.log("Mitti v1.0.0");
 } else if (args[0] === "-h" || args[0] === "--help") {
-  console.log("Mitti dasturlash tili — v0.6.0");
+  console.log("Mitti dasturlash tili — v1.0.0");
   console.log("Ishlatish: mitti [fayl.mt]");
   console.log("Buyruqlar:");
-  console.log("  lint <fayl.mt>       Statik tahlil (linter)");
-  console.log("  lsp                  Language Server Protocol (LSP) serverini ishga tushirish");
-  console.log("  dis <fayl.mt>        Bayt-kodni ko'rsatish (disassembler)");
+  console.log("  lint <fayl.mt>                  Statik tahlil (linter)");
+  console.log("  lsp                             Language Server Protocol (LSP) serverini ishga tushirish");
+  console.log("  dis <fayl.mt>                   Bayt-kodni ko'rsatish (disassembler)");
+  console.log("  wasm <fayl.mt> [-o <chiqish>]   WebAssembly (.wasm) binar moduliga kompilyatsiya qilish");
   console.log("Variantlar:");
-  console.log("  --vm <fayl.mt>       Stack-based VM orqali bajarish");
-  console.log("  -e, --eval <code>    Kod satrini to'g'ridan-to'g'ri bajarish");
-  console.log("  -v, --version        Versiyani ko'rsatish");
-  console.log("  -h, --help           Yordam");
+  console.log("  --vm <fayl.mt>                  Stack-based VM orqali bajarish");
+  console.log("  --wasm <fayl.mt>                WebAssembly runtime orqali to'g'ridan-to'g'ri bajarish");
+  console.log("  -e, --eval <code>               Kod satrini to'g'ridan-to'g'ri bajarish");
+  console.log("  -v, --version                   Versiyani ko'rsatish");
+  console.log("  -h, --help                      Yordam");
 } else if (args[0] === "lsp") {
   startLanguageServer();
 } else if (args[0] === "lint") {
@@ -262,6 +266,61 @@ if (args.length === 0) {
       process.exit(1);
     }
     throw e;
+  }
+} else if (args[0] === "wasm") {
+  // mitti wasm <fayl.mt> [-o <chiqish.wasm>] — WebAssembly moduliga kompilyatsiya qilish
+  if (args.length < 2) {
+    console.error("Xato: wasm buyrug'i fayl yo'lini talab qiladi");
+    process.exit(1);
+  }
+  const srcPath = path.resolve(args[1]);
+  if (!fs.existsSync(srcPath)) {
+    console.error(`Xato: fayl topilmadi: ${args[1]}`);
+    process.exit(1);
+  }
+  let outPath = srcPath.replace(/\.mt$/, "") + ".wasm";
+  if (args[2] === "-o" && args[3]) {
+    outPath = path.resolve(args[3]);
+  }
+  const wasmSrc = fs.readFileSync(srcPath, "utf-8");
+  try {
+    const tokens = new Lexer(wasmSrc).tokenize();
+    const program = new Parser(tokens).parseProgram();
+    const wasmBytes = new WasmCompiler().compile(program);
+    fs.writeFileSync(outPath, wasmBytes);
+    console.log(`✓ WebAssembly moduli muvaffaqiyatli yaratildi: ${path.relative(process.cwd(), outPath)} (${wasmBytes.length} bayt)`);
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    console.error("WASM kompilyatsiya xatosi:", (e as Error).message);
+    process.exit(1);
+  }
+} else if (args[0] === "--wasm") {
+  // mitti --wasm <fayl.mt> — WebAssembly runtime orqali bajarish
+  if (args.length < 2) {
+    console.error("Xato: --wasm parametri fayl yo'lini talab qiladi");
+    process.exit(1);
+  }
+  const wasmPath = path.resolve(args[1]);
+  if (!fs.existsSync(wasmPath)) {
+    console.error(`Xato: fayl topilmadi: ${args[1]}`);
+    process.exit(1);
+  }
+  const wasmCode = fs.readFileSync(wasmPath, "utf-8");
+  try {
+    const tokens = new Lexer(wasmCode).tokenize();
+    const program = new Parser(tokens).parseProgram();
+    const wasmBytes = new WasmCompiler().compile(program);
+    await runWasm(wasmBytes);
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    console.error("WASM ijro xatosi:", (e as Error).message);
+    process.exit(1);
   }
 } else if (args[0] === "-e" || args[0] === "--eval") {
   if (args.length < 2) {

@@ -70,3 +70,4 @@ VM quyidagi asosiy operatsiyalarni o'z ichiga oladi:
 - **Boshqaruv oqimi (Jumps)**: `OP_JUMP`, `OP_JUMP_IF_FALSE`, `OP_JUMP_IF_TRUE`, `OP_LOOP`
 - **Funksiyalar**: `OP_CALL`, `OP_RETURN`
 - **Ma'lumot tuzilmalari**: `OP_BUILD_ARRAY`, `OP_BUILD_OBJECT`, `OP_GET_INDEX`, `OP_SET_INDEX`
+

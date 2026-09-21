@@ -9,8 +9,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.6.0-blue.svg" alt="Version 0.6.0" />
+  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version 1.0.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
+  <img src="https://img.shields.io/badge/WASM-Ready-purple.svg" alt="WASM Ready" />
   <img src="https://img.shields.io/badge/VM-Ready-orange.svg" alt="VM Ready" />
   <img src="https://img.shields.io/badge/LSP-Ready-cyan.svg" alt="LSP Ready" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
@@ -94,12 +95,24 @@ Dasturni Tree-walk o'rniga tezkor Bytecode VM orqali bajarish:
 node dist/main.js --vm examples/vm_benchmark.mt
 ```
 
-### 6. Tezkor Kod Bajarish (`-e, --eval`)
+### 6. WebAssembly Kompilyatori (`wasm`)
+Kodni to'g'ridan-to'g'ri standart `.wasm` binar moduliga kompilyatsiya qilish:
+```bash
+node dist/main.js wasm examples/wasm_math.mt -o dist/math.wasm
+```
+
+### 7. WebAssembly Runtime orqali Ishga Tushirish (`--wasm`)
+Dasturni WebAssembly engine orqali bajarish:
+```bash
+node dist/main.js --wasm examples/wasm_math.mt
+```
+
+### 8. Tezkor Kod Bajarish (`-e, --eval`)
 ```bash
 node dist/main.js -e "x: int = 10; print(x * 2)"
 ```
 
-### 7. Interaktiv REPL (Read-Eval-Print Loop)
+### 9. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
@@ -107,7 +120,7 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.6 — chiqish uchun 'exit' yoki Ctrl+D
+Mitti REPL v1.0 — chiqish uchun 'exit' yoki Ctrl+D
 > x: int = 10
 10
 > x * 2
@@ -117,8 +130,13 @@ Mitti REPL v0.6 — chiqish uchun 'exit' yoki Ctrl+D
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.6.0)
+## 🌟 Til imkoniyatlari (v1.0.0)
 
+- **WebAssembly (WASM) Backend & Web Playground**:
+  - Toza TypeScript'da hech qanday LLVM/Emscriptensiz to'g'ridan-to'g'ri `.wasm` binar generatsiyasi
+  - `mitti wasm <fayl.mt> -o <chiqish.wasm>` — binar modul yaratish
+  - `mitti --wasm <fayl.mt>` — Node.js va brauzerda to'g'ridan-to'g'ri WASM ijro
+  - Rasmiy hujjatlarda interaktiv **Web Playground** sahifasi
 - **Bytecode Compiler va Virtual Machine (VM)**:
   - AST'ni xotirada ixcham bayt-kod instruksiyalariga (`Chunk`) kompilyatsiya qilish
   - Stack-based VM — tejamkor xotira boshqaruvi va chaqiruvlar steki (Call Frames)

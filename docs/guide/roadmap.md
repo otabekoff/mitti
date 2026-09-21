@@ -10,4 +10,5 @@ Mitti tili bosqichma-bosqich rivojlantirib boriladi. Quyida rejalashtirilgan bos
 | **v0.4** | ✅ Tayyor | Statik ixtiyoriy tiplash (Gradual Typing): `x: int`, `func f(a: str) -> int:`, runtime `MittiTypeError`, `mitti lint` statik tahlilchi |
 | **v0.5** | ✅ Tayyor | LSP (Language Server Protocol) — `mitti lsp` til serveri, VS Code kengaytmasi, TextMate sintaksis va autocompletion |
 | **v0.6** | ✅ Tayyor | Bytecode VM — Stack-based virtual mashina (`--vm`), bayt-kod disassembler (`dis`), tezkor bajarilish |
-| **v1.0** | ⏳ Rejada | Native / WebAssembly (WASM) kompilyatsiyasi |
+| **v1.0** | ✅ Tayyor | WebAssembly (WASM) kompilyatsiyasi (`wasm`), WASM runner (`--wasm`), interaktiv Web Playground |
+

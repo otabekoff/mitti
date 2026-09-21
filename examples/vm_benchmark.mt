@@ -15,3 +15,4 @@ yigindi = 0
 for i in range(100000):
     yigindi += i
 print("Yig'indi:", yigindi)
+
