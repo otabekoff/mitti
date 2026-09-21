@@ -47,7 +47,22 @@ export type Stmt =
   | FunctionDecl
   | ReturnStmt
   | BreakStmt
-  | ContinueStmt;
+  | ContinueStmt
+  | ImportStmt;
+
+export interface ImportSpecifier {
+  imported: string;
+  local: string;
+}
+
+export interface ImportStmt {
+  kind: "ImportStmt";
+  source: string;
+  isFrom: boolean;
+  specifiers?: ImportSpecifier[];
+  alias?: string;
+  line: number;
+}
 
 export interface ExprStmt { kind: "ExprStmt"; expression: Expr; line: number; }
 export interface BlockStmt { kind: "BlockStmt"; body: Stmt[]; line: number; }

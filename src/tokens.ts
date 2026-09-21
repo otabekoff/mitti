@@ -21,6 +21,9 @@ export enum TokenType {
   AND = "AND",
   OR = "OR",
   NOT = "NOT",
+  IMPORT = "IMPORT",
+  FROM = "FROM",
+  AS = "AS",
 
   // Operators / punctuation
   PLUS = "PLUS",
@@ -83,4 +86,7 @@ export const KEYWORDS: Record<string, TokenType> = {
   and: TokenType.AND,
   or: TokenType.OR,
   not: TokenType.NOT,
+  import: TokenType.IMPORT,
+  from: TokenType.FROM,
+  as: TokenType.AS,
 };

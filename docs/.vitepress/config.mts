@@ -18,6 +18,8 @@ export default defineConfig({
           { text: 'Boshlash', link: '/guide/getting-started' },
           { text: 'Sintaksis va operatorlar', link: '/guide/syntax' },
           { text: "Ma'lumot tuzilmalari", link: '/guide/data-structures' },
+          { text: 'Modullar tizimi (Modules)', link: '/guide/modules' },
+          { text: 'Fayllar bilan ishlash (File I/O)', link: '/guide/file-io' },
           { text: 'Built-in funksiyalar', link: '/guide/builtins' }
         ]
       },
@@ -35,7 +37,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Mitti dasturlash tili — v0.1.0',
+      message: 'Mitti dasturlash tili — v0.2.0',
       copyright: 'Mitti jamoasi tomonidan ochiq manba bilan yaratilgan'
     }
   }

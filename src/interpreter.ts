@@ -1,4 +1,8 @@
+import * as fs from "fs";
+import * as path from "path";
 import * as A from "./ast";
+import { Lexer } from "./lexer";
+import { Parser } from "./parser";
 import {
   Environment,
   MittiValue,
@@ -16,7 +20,10 @@ import {
 
 export class Interpreter {
   public globals = new Environment();
+  public currentFilePath: string | null = null;
   private output: (s: string) => void;
+  private moduleCache: Map<string, MittiObject> = new Map();
+  private loadingModules: Set<string> = new Set();
 
   constructor(output: (s: string) => void = (s) => process.stdout.write(s + "\n")) {
     this.output = output;
@@ -106,6 +113,31 @@ export class Interpreter {
       case "BlockStmt":
         this.execBlock(stmt, new Environment(env));
         return;
+
+      case "ImportStmt": {
+        const modObj = this.loadModule(stmt.source, stmt.line);
+        if (stmt.isFrom) {
+          if (stmt.specifiers) {
+            for (const spec of stmt.specifiers) {
+              if (!modObj.map.has(spec.imported)) {
+                throw new MittiRuntimeError(`Modulda '${spec.imported}' topilmadi`, stmt.line);
+              }
+              env.define(spec.local, modObj.map.get(spec.imported)!);
+            }
+          }
+        } else {
+          let moduleName = stmt.alias;
+          if (!moduleName) {
+            if (stmt.source === "math" || stmt.source === "os" || stmt.source === "json") {
+              moduleName = stmt.source;
+            } else {
+              moduleName = path.basename(stmt.source, path.extname(stmt.source));
+            }
+          }
+          env.define(moduleName, modObj);
+        }
+        return;
+      }
     }
   }
 
@@ -469,5 +501,204 @@ export class Interpreter {
     def("pow", (args) => Math.pow(args[0] as number, args[1] as number));
 
     def("input", () => null); // Node muhitida sinxron input yo'q; kengaytirish mumkin
+
+    def("read_file", (args) => {
+      if (args.length === 0) throw new MittiRuntimeError("read_file() fayl yo'lini talab qiladi", 0);
+      const p = String(args[0]);
+      const resolved = this.resolvePath(p);
+      if (!fs.existsSync(resolved)) throw new MittiRuntimeError(`Fayl topilmadi: '${p}'`, 0);
+      return fs.readFileSync(resolved, "utf-8");
+    });
+
+    def("write_file", (args) => {
+      if (args.length < 2) throw new MittiRuntimeError("write_file() fayl yo'li va kontent talab qiladi", 0);
+      const p = String(args[0]);
+      const content = stringify(args[1]);
+      const resolved = this.resolvePath(p);
+      fs.writeFileSync(resolved, content, "utf-8");
+      return true;
+    });
+
+    def("append_file", (args) => {
+      if (args.length < 2) throw new MittiRuntimeError("append_file() fayl yo'li va kontent talab qiladi", 0);
+      const p = String(args[0]);
+      const content = stringify(args[1]);
+      const resolved = this.resolvePath(p);
+      fs.appendFileSync(resolved, content, "utf-8");
+      return true;
+    });
+
+    def("file_exists", (args) => {
+      if (args.length === 0) return false;
+      const p = String(args[0]);
+      const resolved = this.resolvePath(p);
+      return fs.existsSync(resolved);
+    });
+
+    def("remove_file", (args) => {
+      if (args.length === 0) return false;
+      const p = String(args[0]);
+      const resolved = this.resolvePath(p);
+      if (fs.existsSync(resolved)) {
+        fs.unlinkSync(resolved);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  public resolvePath(targetPath: string): string {
+    if (path.isAbsolute(targetPath)) return targetPath;
+    if (this.currentFilePath) {
+      return path.resolve(path.dirname(this.currentFilePath), targetPath);
+    }
+    return path.resolve(process.cwd(), targetPath);
+  }
+
+  public loadModule(source: string, line: number): MittiObject {
+    if (source === "math") return this.getMathModule();
+    if (source === "os") return this.getOsModule();
+    if (source === "json") return this.getJsonModule();
+
+    let absPath = this.resolvePath(source);
+    if (!fs.existsSync(absPath) && fs.existsSync(absPath + ".mt")) {
+      absPath += ".mt";
+    }
+
+    if (!fs.existsSync(absPath)) {
+      throw new MittiRuntimeError(`Modul fayli topilmadi: '${source}'`, line);
+    }
+
+    if (this.moduleCache.has(absPath)) {
+      return this.moduleCache.get(absPath)!;
+    }
+
+    if (this.loadingModules.has(absPath)) {
+      throw new MittiRuntimeError(`Aylanma (circular) import xatosi: '${source}'`, line);
+    }
+
+    this.loadingModules.add(absPath);
+    const content = fs.readFileSync(absPath, "utf-8");
+    const tokens = new Lexer(content).tokenize();
+    const program = new Parser(tokens).parseProgram();
+
+    const moduleEnv = new Environment(this.globals);
+    const prevFile = this.currentFilePath;
+    this.currentFilePath = absPath;
+
+    try {
+      for (const stmt of program.body) {
+        this.execStmt(stmt, moduleEnv);
+      }
+    } finally {
+      this.currentFilePath = prevFile;
+      this.loadingModules.delete(absPath);
+    }
+
+    const modObj = new MittiObject();
+    for (const [k, v] of moduleEnv.getLocalVars().entries()) {
+      modObj.map.set(k, v);
+    }
+
+    this.moduleCache.set(absPath, modObj);
+    return modObj;
+  }
+
+  private getMathModule(): MittiObject {
+    if (this.moduleCache.has("__builtin_math__")) {
+      return this.moduleCache.get("__builtin_math__")!;
+    }
+    const m = new MittiObject();
+    m.map.set("pi", Math.PI);
+    m.map.set("e", Math.E);
+    m.map.set("sin", new NativeFunction("sin", (args) => Math.sin(args[0] as number)));
+    m.map.set("cos", new NativeFunction("cos", (args) => Math.cos(args[0] as number)));
+    m.map.set("tan", new NativeFunction("tan", (args) => Math.tan(args[0] as number)));
+    m.map.set("log", new NativeFunction("log", (args) => Math.log(args[0] as number)));
+    m.map.set("sqrt", new NativeFunction("sqrt", (args) => Math.sqrt(args[0] as number)));
+    m.map.set("pow", new NativeFunction("pow", (args) => Math.pow(args[0] as number, args[1] as number)));
+    m.map.set("abs", new NativeFunction("abs", (args) => Math.abs(args[0] as number)));
+    m.map.set("round", new NativeFunction("round", (args) => Math.round(args[0] as number)));
+    m.map.set("floor", new NativeFunction("floor", (args) => Math.floor(args[0] as number)));
+    m.map.set("ceil", new NativeFunction("ceil", (args) => Math.ceil(args[0] as number)));
+    m.map.set("random", new NativeFunction("random", () => Math.random()));
+    m.map.set("min", new NativeFunction("min", (args) => Math.min(...(args as number[]))));
+    m.map.set("max", new NativeFunction("max", (args) => Math.max(...(args as number[]))));
+
+    this.moduleCache.set("__builtin_math__", m);
+    return m;
+  }
+
+  private getOsModule(): MittiObject {
+    if (this.moduleCache.has("__builtin_os__")) {
+      return this.moduleCache.get("__builtin_os__")!;
+    }
+    const o = new MittiObject();
+    o.map.set("platform", process.platform);
+    o.map.set("arch", process.arch);
+    o.map.set("cwd", new NativeFunction("cwd", () => process.cwd()));
+    o.map.set("env", new NativeFunction("env", (args) => {
+      if (args.length === 0) {
+        const envObj = new MittiObject();
+        for (const [k, v] of Object.entries(process.env)) {
+          if (v !== undefined) envObj.map.set(k, v);
+        }
+        return envObj;
+      }
+      return process.env[String(args[0])] ?? null;
+    }));
+
+    this.moduleCache.set("__builtin_os__", o);
+    return o;
+  }
+
+  private getJsonModule(): MittiObject {
+    if (this.moduleCache.has("__builtin_json__")) {
+      return this.moduleCache.get("__builtin_json__")!;
+    }
+    const j = new MittiObject();
+    j.map.set("parse", new NativeFunction("parse", (args) => {
+      try {
+        const parsed = JSON.parse(String(args[0]));
+        return this.toMittiValue(parsed);
+      } catch (e) {
+        throw new MittiRuntimeError("JSON parse xatosi: " + (e as Error).message, 0);
+      }
+    }));
+    j.map.set("stringify", new NativeFunction("stringify", (args) => {
+      const jsVal = this.toJsValue(args[0]);
+      return JSON.stringify(jsVal);
+    }));
+
+    this.moduleCache.set("__builtin_json__", j);
+    return j;
+  }
+
+  private toMittiValue(val: unknown): MittiValue {
+    if (val === null || val === undefined) return null;
+    if (typeof val === "number" || typeof val === "string" || typeof val === "boolean") return val;
+    if (Array.isArray(val)) return val.map((x) => this.toMittiValue(x));
+    if (typeof val === "object") {
+      const obj = new MittiObject();
+      for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
+        obj.map.set(k, this.toMittiValue(v));
+      }
+      return obj;
+    }
+    return String(val);
+  }
+
+  private toJsValue(val: MittiValue): unknown {
+    if (val === null) return null;
+    if (typeof val === "number" || typeof val === "string" || typeof val === "boolean") return val;
+    if (Array.isArray(val)) return val.map((x) => this.toJsValue(x));
+    if (val instanceof MittiObject) {
+      const result: Record<string, unknown> = {};
+      for (const [k, v] of val.map.entries()) {
+        result[k] = this.toJsValue(v);
+      }
+      return result;
+    }
+    return stringify(val);
   }
 }

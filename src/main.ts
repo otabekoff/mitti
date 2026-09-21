@@ -21,6 +21,7 @@ function runFile(filePath: string) {
   }
   const src = fs.readFileSync(resolved, "utf-8");
   const interp = new Interpreter();
+  interp.currentFilePath = resolved;
   try {
     runSource(src, interp);
   } catch (e) {
@@ -33,7 +34,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.1 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v0.2 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -143,6 +144,14 @@ function stringifyForRepl(v: unknown): string {
 const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
+} else if (args[0] === "-v" || args[0] === "--version") {
+  console.log("Mitti v0.2.0");
+} else if (args[0] === "-h" || args[0] === "--help") {
+  console.log("Mitti dasturlash tili — v0.2.0");
+  console.log("Ishlatish: mitti [fayl.mt]");
+  console.log("Variantlar:");
+  console.log("  -v, --version    Versiyani ko'rsatish");
+  console.log("  -h, --help       Yordam");
 } else {
   runFile(args[0]);
 }

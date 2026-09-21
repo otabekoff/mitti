@@ -73,6 +73,10 @@ export class Environment {
     this.vars.set(name, value);
     void line;
   }
+
+  getLocalVars(): Map<string, MittiValue> {
+    return new Map(this.vars);
+  }
 }
 
 export function isTruthy(v: MittiValue): boolean {

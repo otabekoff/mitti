@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version 0.1.0" />
+  <img src="https://img.shields.io/badge/version-0.2.0-blue.svg" alt="Version 0.2.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen" alt="Node.js" />
@@ -26,7 +26,7 @@ Source code (*.mt)
        ↓
       AST           (src/ast.ts)        ──> Sintaktik model
        ↓
-  Interpreter       (src/interpreter.ts + src/runtime.ts) ──> Tree-walk ijro
+  Interpreter       (src/interpreter.ts + src/runtime.ts) ──> Tree-walk ijro + Modules + I/O
 ```
 
 ---
@@ -55,12 +55,12 @@ npm run build
 Mitti dastur fayllari `.mt` kengaytmasiga ega bo'ladi:
 
 ```bash
-node dist/main.js examples/hello.mt
+node dist/main.js examples/modules/main.mt
 ```
 
 Development rejimida (build qilmasdan to'g'ridan-to'g'ri `tsx` orqali):
 ```bash
-npm run dev examples/hello.mt
+npm run dev examples/modules/main.mt
 ```
 
 ### 2. Interaktiv REPL (Read-Eval-Print Loop)
@@ -71,7 +71,7 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.1 — chiqish uchun 'exit' yoki Ctrl+D
+Mitti REPL v0.2 — chiqish uchun 'exit' yoki Ctrl+D
 > x = 10
 10
 > x * 2
@@ -88,8 +88,18 @@ Salom, Ali
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.1.0)
+## 🌟 Til imkoniyatlari (v0.2.0)
 
+- **Modullar tizimi (Modules)**:
+  - `import "./modul.mt" as nom` va `import "./modul.mt"`
+  - `from "./modul.mt" import funksiya, o'zgaruvchi as alias`
+  - Modullarni avtomatik xotirada keshlash va aylanma (circular) importlardan himoyalash
+- **Standart Kiritilgan Modullar**:
+  - `math`: `pi`, `e`, `sin`, `cos`, `tan`, `log`, `sqrt`, `pow`, `abs`, `round`, `floor`, `ceil`, `min`, `max`, `random`
+  - `os`: `platform`, `arch`, `cwd()`, `env()`
+  - `json`: `parse(str)`, `stringify(val)`
+- **Fayl Tizimi bilan Ishlash (File I/O)**:
+  - `read_file(path)`, `write_file(path, content)`, `append_file(path, content)`, `file_exists(path)`, `remove_file(path)`
 - **O'zgaruvchilar va ma'lumot turlari**: `number`, `string`, `boolean` (`true`/`false`), `null`
 - **Arifmetika & Tayinlash**: `+`, `-`, `*`, `/`, `%` hamda `+=`, `-=`, `*=`, `/=`
 - **Taqqoslash va mantiq**: `==`, `!=`, `<`, `>`, `<=`, `>=`, `and`, `or`, `not`
@@ -98,6 +108,8 @@ Salom, Ali
 - **Funksiyalar va Closures**: `func name(a, b):` va `return`, birinchi darajali funksiyalar (first-class citizens) va leksik muhit (lexical closures)
 - **Massivlar (Arrays)**: `[1, 2, 3]`, 0-asosli va **manfiy indekslash** (`arr[-1]`)
 - **Lug'at / Obyektlar (Maps/Objects)**: `{key: "value"}`, `obj.key` va `obj["key"]`
+- **Kiritilgan Yordamchi Funksiyalar**:
+  - `print`, `len`, `range`, `type`, `str`, `int`, `float`, `push`, `pop`, `keys`, `values`, `has`, `upper`, `lower`, `trim`, `split`, `join`, `abs`, `min`, `max`, `round`, `floor`, `ceil`, `sqrt`, `pow`
 - **24 ta Kiritilgan (Built-in) Funksiyalar**:
   - *Chiqarish va Turlar*: `print`, `len`, `range`, `type`, `str`, `int`, `float`
   - *Massivlar*: `push`, `pop`
@@ -165,6 +177,8 @@ Mitti/
 │   ├── guide/            # Qo'llanmalar (syntax, builtins, internals, roadmap)
 │   └── index.md          # Hujjatlar bosh sahifasi
 ├── examples/             # Mitti kod namunalari (*.mt)
+│   ├── modules/          # Modullar namunalari (math_utils.mt, main.mt)
+│   ├── file_io.mt        # Fayllar bilan ishlash namunasi
 │   ├── hello.mt          # Asosiy xususiyatlar namunasi
 │   └── tests.mt          # Qo'shimcha testlar va closures
 ├── src/                  # Interpreter manba kodi (TypeScript)
@@ -173,7 +187,7 @@ Mitti/
 │   ├── ast.ts            # AST tugun interfeyslari
 │   ├── parser.ts         # Recursive-descent parser
 │   ├── runtime.ts        # Muhit (Environment), Scope va Qiymatlar
-│   ├── interpreter.ts    # Tree-walking interpreter + Built-in funksiyalar
+│   ├── interpreter.ts    # Tree-walking interpreter + Built-in funksiyalar + Modullar + I/O
 │   └── main.ts           # CLI va interaktiv REPL
 ├── package.json          # Loyiha konfiguratsiyasi va scriptlar
 ├── tsconfig.json         # TypeScript konfiguratsiyasi
@@ -185,7 +199,7 @@ Mitti/
 ## 🗺️ Yo'l xaritasi (Roadmap)
 
 - [x] **v0.1.0**: Tree-walk interpreter, Python-uslub sintaksis, 24 built-in funksiya, closures, massiv/obyektlar, CLI & REPL
-- [ ] **v0.2.0**: Modullar tizimi (`import`), fayl I/O (`open`, `read`, `write`)
+- [x] **v0.2.0**: Modullar tizimi (`import`, `from-import`, `as`), standart modullar (`math`, `os`, `json`), fayl I/O (`read_file`, `write_file`, `append_file`, `file_exists`, `remove_file`)
 - [ ] **v0.3.0**: Xatolarni boshqarish (`try / except`), yaxshilangan stacktrace
 - [ ] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter
 - [ ] **v0.5.0**: LSP (Language Server Protocol) — VS Code kengaytmasi

@@ -64,6 +64,8 @@ export class Parser {
       case T.FOR: return this.forStatement();
       case T.FUNC: return this.functionDecl();
       case T.RETURN: return this.returnStatement();
+      case T.IMPORT: return this.importStatement();
+      case T.FROM: return this.fromStatement();
       case T.BREAK:
         this.advance();
         this.endOfStatement();
@@ -150,6 +152,72 @@ export class Parser {
     }
     this.endOfStatement();
     return { kind: "ReturnStmt", value, line };
+  }
+
+  private importStatement(): A.ImportStmt {
+    const t = this.advance(); // 'import'
+    let source = "";
+    if (this.check(T.STRING)) {
+      source = this.advance().value;
+    } else if (this.check(T.IDENT)) {
+      source = this.advance().value;
+    } else {
+      throw new MittiSyntaxError("import dan so'ng modul nomi yoki fayl yo'li (satr) kutilgan edi", t.line, t.col);
+    }
+
+    let alias: string | undefined = undefined;
+    if (this.check(T.AS)) {
+      this.advance(); // 'as'
+      alias = this.expect(T.IDENT, "'as' dan so'ng identifikator kutilgan edi").value;
+    }
+
+    this.endOfStatement();
+    return {
+      kind: "ImportStmt",
+      source,
+      isFrom: false,
+      alias,
+      line: t.line,
+    };
+  }
+
+  private fromStatement(): A.ImportStmt {
+    const t = this.advance(); // 'from'
+    let source = "";
+    if (this.check(T.STRING)) {
+      source = this.advance().value;
+    } else if (this.check(T.IDENT)) {
+      source = this.advance().value;
+    } else {
+      throw new MittiSyntaxError("from dan so'ng modul nomi yoki fayl yo'li (satr) kutilgan edi", t.line, t.col);
+    }
+
+    this.expect(T.IMPORT, "modul manbasidan so'ng 'import' kutilgan edi");
+
+    const specifiers: A.ImportSpecifier[] = [];
+    do {
+      const imported = this.expect(T.IDENT, "import qilinadigan nom kutilgan edi").value;
+      let local = imported;
+      if (this.check(T.AS)) {
+        this.advance();
+        local = this.expect(T.IDENT, "'as' dan so'ng identifikator kutilgan edi").value;
+      }
+      specifiers.push({ imported, local });
+      if (this.check(T.COMMA)) {
+        this.advance();
+      } else {
+        break;
+      }
+    } while (!this.check(T.NEWLINE) && !this.check(T.EOF));
+
+    this.endOfStatement();
+    return {
+      kind: "ImportStmt",
+      source,
+      isFrom: true,
+      specifiers,
+      line: t.line,
+    };
   }
 
   private exprStatement(): A.ExprStmt {
