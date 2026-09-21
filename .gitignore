@@ -4,3 +4,4 @@ dist/
 .vitepress/cache/
 PROMPT.md
 *.log
+*.vsix

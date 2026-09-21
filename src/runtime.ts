@@ -76,10 +76,10 @@ export function checkType(value: MittiValue, annotation: string, line: number, c
   let ok = true;
   switch (annotation) {
     case "int":
-      ok = typeof value === "number" && Number.isInteger(value);
+      ok = typeof value === "number";
       if (!ok) {
         throw new MittiTypeError(
-          `${label} uchun 'int' tipi kutilgan, '${typeName(value)}' keldi${typeof value === "number" ? " (butun son emas)" : ""}`,
+          `${label} uchun 'int' tipi kutilgan, '${typeName(value)}' keldi`,
           line
         );
       }

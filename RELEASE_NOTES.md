@@ -36,13 +36,13 @@
 
 ## 🚀 O'rnatish
 
-### npm orqali (global):
+### 1. npm orqali (global):
 ```bash
 npm install -g otabekoff/mitti
 mitti --version
 ```
 
-### Manba kodidan:
+### 2. Manba kodidan:
 ```bash
 git clone https://github.com/otabekoff/mitti.git
 cd mitti
@@ -52,24 +52,31 @@ npm link
 mitti --version
 ```
 
+### 3. VS Code kengaytmasini o'rnatish (.vsix):
+Release fayllari orasidan `mitti-vscode-1.0.0.vsix` faylini yuklab oling va o'rnating:
+```bash
+code --install-extension mitti-vscode-1.0.0.vsix
+```
+Yoki VS Code ichida: **Extensions (Ctrl+Shift+X) -> ... (yuqoridagi uch nuqta) -> Install from VSIX...**
+
 ---
 
 ## 📖 Misol
 
 ```mitti
-# Salom Dunyo!
-chop("Salom, Dunyo!")
+# Hello World!
+print("Hello, World!")
 
-# Funksiya
-func yig_indira(a, b):
-    qaytarish a + b
+# Function with types
+func add(a: int, b: int) -> int:
+    return a + b
 
-natija = yig_indira(10, 32)
-chop(natija)  # 42
+result = add(10, 32)
+print("Result:", result)  # 42
 
-# Tsikl
-uchun i in oraliq(1, 6):
-    chop(i)
+# Loops
+for i in range(1, 6):
+    print("Step:", i)
 ```
 
 ---

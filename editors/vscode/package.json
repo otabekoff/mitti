@@ -1,13 +1,13 @@
 {
   "name": "mitti-vscode",
   "displayName": "Mitti Language Support",
-  "description": "Rasmiy Mitti dasturlash tili uchun sintaksis bo'yash, avtomatik to'ldirish va LSP integratsiyasi",
-  "version": "0.5.0",
+  "description": "Official syntax highlighting, auto-complete and LSP integration for the Mitti programming language",
+  "version": "1.0.0",
   "publisher": "mitti-lang",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mitti-lang/mitti"
+    "url": "https://github.com/otabekoff/mitti"
   },
   "engines": {
     "vscode": "^1.75.0"
