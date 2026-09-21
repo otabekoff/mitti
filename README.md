@@ -43,83 +43,96 @@ Source code (*.mt)
 
 Tizimingizda [Node.js](https://nodejs.org) (v18+) o'rnatilgan bo'lishi lozim.
 
-### Global o'rnatish (Terminalda to'g'ridan-to'g'ri ishlatish uchun):
+### 1. Global o'rnatish (npm orqali):
 ```bash
 npm install -g otabekoff/mitti
 mitti --version
 ```
 
-Yoki manba kodidan:
+### 2. VS Code kengaytmasini o'rnatish (.vsix):
+Rasmiy [GitHub Releases](https://github.com/otabekoff/mitti/releases/tag/v1.0.0) sahifasidan `mitti-vscode-1.0.0.vsix` faylini yuklab oling va o'rnating:
+```bash
+code --install-extension mitti-vscode-1.0.0.vsix
+```
+Yoki VS Code ichida: **Extensions (Ctrl+Shift+X) ➔ `...` (yuqoridagi uch nuqta) ➔ Install from VSIX...**
+
+### 3. Manba kodidan o'rnatish:
 ```bash
 git clone https://github.com/otabekoff/mitti.git
 cd mitti
 npm install
 npm run build
 npm link
+mitti --version
 ```
+
+### 4. Brauzerda o'rnatmasdan sinab ko'rish:
+Interaktiv muharrir va haqiqiy interpreter: [Mitti Web Playground](https://otabekoff.github.io/mitti/playground.html)
 
 ---
 
 ## 💻 Ishlatish
 
+Mitti global o'rnatilgandan so'ng to'g'ridan-to'g'ri `mitti` buyrug'i orqali ishlatiladi:
+
 ### 1. Faylni ishga tushirish
 Mitti dastur fayllari `.mt` kengaytmasiga ega bo'ladi:
 
 ```bash
-node dist/main.js examples/error_handling.mt
+mitti examples/hello.mt
 ```
 
 Development rejimida (build qilmasdan to'g'ridan-to'g'ri `tsx` orqali):
 ```bash
-npm run dev examples/error_handling.mt
+npm run dev examples/hello.mt
 ```
 
 ### 2. Statik Tahlilchi (Linter)
 Kodni bajarmasdan oldin sintaksis, ishlatilmagan importlar, aniqlanmagan o'zgaruvchilar va tip nomuvofiqliklarini tekshirish:
 ```bash
-node dist/main.js lint examples/typing.mt
+mitti lint examples/typing.mt
 ```
 
 ### 3. Language Server Protocol (`mitti lsp`)
 VS Code, Neovim yoki Helix bilan real-vaqtda bog'lanuvchi til serverini ishga tushirish:
 ```bash
-node dist/main.js lsp
+mitti lsp
 ```
 
 ### 4. Bayt-kod Disassembler (`dis`)
 Kompilyatsiya qilingan bayt-kod instruksiyalarini ko'rish:
 ```bash
-node dist/main.js dis examples/hello.mt
+mitti dis examples/hello.mt
 ```
 
 ### 5. Stack-based Virtual Machine (`--vm`)
 Dasturni Tree-walk o'rniga tezkor Bytecode VM orqali bajarish:
 ```bash
-node dist/main.js --vm examples/vm_benchmark.mt
+mitti --vm examples/vm_benchmark.mt
 ```
 
 ### 6. WebAssembly Kompilyatori (`wasm`)
 Kodni to'g'ridan-to'g'ri standart `.wasm` binar moduliga kompilyatsiya qilish:
 ```bash
-node dist/main.js wasm examples/wasm_math.mt -o dist/math.wasm
+mitti wasm examples/wasm_math.mt -o dist/math.wasm
 ```
 
 ### 7. WebAssembly Runtime orqali Ishga Tushirish (`--wasm`)
-Dasturni WebAssembly engine orqali bajarish:
+Dasturni WebAssembly engine orqali to'g'ridan-to'g'ri bajarish:
 ```bash
-node dist/main.js --wasm examples/wasm_math.mt
+mitti --wasm examples/wasm_math.mt
 ```
 
 ### 8. Tezkor Kod Bajarish (`-e, --eval`)
 ```bash
-node dist/main.js -e "x: int = 10; print(x * 2)"
+mitti -e "x: int = 10; print(x * 2)"
 ```
 
 ### 9. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
-node dist/main.js
+mitti
 ```
 
 ```text
@@ -129,6 +142,7 @@ Mitti REPL v1.0 — chiqish uchun 'exit' yoki Ctrl+D
 > x * 2
 20
 > exit
+Xayr!
 ```
 
 ---
@@ -139,7 +153,7 @@ Mitti REPL v1.0 — chiqish uchun 'exit' yoki Ctrl+D
   - Toza TypeScript'da hech qanday LLVM/Emscriptensiz to'g'ridan-to'g'ri `.wasm` binar generatsiyasi
   - `mitti wasm <fayl.mt> -o <chiqish.wasm>` — binar modul yaratish
   - `mitti --wasm <fayl.mt>` — Node.js va brauzerda to'g'ridan-to'g'ri WASM ijro
-  - Rasmiy hujjatlarda interaktiv **Web Playground** sahifasi
+  - Brauzerda real-vaqtda ishlovchi sintaksis bo'yash bilan jihozlangan **Web Playground**
 - **Bytecode Compiler va Virtual Machine (VM)**:
   - AST'ni xotirada ixcham bayt-kod instruksiyalariga (`Chunk`) kompilyatsiya qilish
   - Stack-based VM — tejamkor xotira boshqaruvi va chaqiruvlar steki (Call Frames)
@@ -209,7 +223,7 @@ print("Faktoriallar yig'indisi:", jami)
 
 ## 📚 Hujjatlar (Documentation)
 
-Loyiha uchun [VitePress](https://vitepress.dev/) asosida to'liq hujjatlar tayyorlangan.
+Loyiha uchun [VitePress](https://vitepress.dev/) asosida to'liq hujjatlar tayyorlangan: **[mitti docs](https://otabekoff.github.io/mitti)**
 
 Hujjatlar serverini lokal ishga tushirish:
 ```bash
@@ -230,27 +244,32 @@ Mitti/
 ├── assets/               # Loyiha logosi va grafik resurslar
 │   └── logo.png          # Rasmiy Mitti logosi
 ├── docs/                 # VitePress asosidagi to'liq hujjatlar
-│   ├── .vitepress/       # VitePress konfiguratsiyasi
-│   ├── guide/            # Qo'llanmalar (syntax, modules, errors, typing, lsp, roadmap)
+│   ├── .vitepress/       # VitePress konfiguratsiyasi va Playground.vue
+│   ├── guide/            # Qo'llanmalar (syntax, modules, errors, typing, lsp, wasm, roadmap)
+│   ├── playground.md     # Web Playground sahifasi
 │   └── index.md          # Hujjatlar bosh sahifasi
 ├── editors/              # Matn muharrirlari uchun kengaytmalar
-│   └── vscode/           # Rasmiy VS Code kengaytmasi (TextMate grammar, icon)
+│   └── vscode/           # Rasmiy VS Code kengaytmasi (TextMate grammar, client.js)
 ├── examples/             # Mitti kod namunalari (*.mt)
 │   ├── modules/          # Modullar namunalari (math_utils.mt, main.mt)
 │   ├── error_handling.mt # Xatolarni boshqarish namunasi
 │   ├── typing.mt         # Statik tiplash namunasi
 │   ├── file_io.mt        # Fayllar bilan ishlash namunasi
+│   ├── wasm_math.mt      # WebAssembly namunasi
 │   └── hello.mt          # Asosiy xususiyatlar namunasi
 ├── src/                  # Interpreter manba kodi (TypeScript)
 │   ├── lsp/              # Language Server Protocol (server.ts)
+│   ├── vm/               # Stack-based Bytecode VM, Compiler, Disassembler
+│   ├── wasm/             # WebAssembly (WASM) binary encoder, compiler, runner
+│   ├── web/              # Browser-safe WebInterpreter & runner
 │   ├── tokens.ts         # Token turlari va kalit so'zlar
 │   ├── lexer.ts          # Lexer (indentatsiya tracking)
-│   ├── ast.ts            # AST tugun interfeyslari (TypedParam, Annotations)
-│   ├── parser.ts         # Recursive-descent parser (tiplarni o'qish)
+│   ├── ast.ts            # AST tugun interfeyslari
+│   ├── parser.ts         # Recursive-descent parser
 │   ├── runtime.ts        # Muhit (Environment), MittiTypeError va checkType()
 │   ├── interpreter.ts    # Tree-walking interpreter + Runtime type checking
-│   ├── linter.ts         # Statik tahlilchi (undefined vars, unused imports, type mismatch)
-│   └── main.ts           # CLI (run, eval, lint, lsp) va interaktiv REPL
+│   ├── linter.ts         # Statik tahlilchi
+│   └── main.ts           # CLI (run, eval, lint, lsp, dis, wasm, --vm, --wasm)
 ├── package.json          # Loyiha konfiguratsiyasi va scriptlar
 ├── tsconfig.json         # TypeScript konfiguratsiyasi
 └── README.md             # Loyiha tavsifi
@@ -265,8 +284,15 @@ Mitti/
 - [x] **v0.3.0**: ESM (`"type": "module"`), xatolarni boshqarish (`try / except / finally`), maxsus xatolar (`raise / throw`), vizual Call Stack Trace
 - [x] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter (`mitti lint`)
 - [x] **v0.5.0**: LSP (Language Server Protocol) — `mitti lsp` til serveri va VS Code kengaytmasi
-- [ ] **v0.6.0**: Bytecode VM — tezlikni oshirish uchun virtual mashina
-- [ ] **v1.0.0**: Native va WebAssembly (WASM) kompilyatsiyasi
+- [x] **v0.6.0**: Stack-based Bytecode VM (`mitti --vm`) va Bayt-kod Disassembler (`mitti dis`)
+- [x] **v1.0.0**: WebAssembly (WASM) backend (`mitti wasm`, `mitti --wasm`), Web Playground va GitHub Release 🎊
+
+---
+
+## 📄 Litsenziya
+
+MIT License © 2026 Mitti.
+
 
 ---
 
