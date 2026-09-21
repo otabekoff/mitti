@@ -493,6 +493,45 @@ export class WebInterpreter {
     def("ceil", (args) => Math.ceil(args[0] as number));
     def("sqrt", (args) => Math.sqrt(args[0] as number));
     def("pow", (args) => Math.pow(args[0] as number, args[1] as number));
+
+    // === O'zbek tilidagi taxalluslar (Uzbek aliases) ===
+    def("chop", (args) => { this.output(args.map((a) => stringify(a)).join(" ")); return null; });
+    def("oraliq", (args) => {
+      let start = 0, stop = 0, step = 1;
+      if (args.length === 1) stop = args[0] as number;
+      else if (args.length === 2) { start = args[0] as number; stop = args[1] as number; }
+      else if (args.length >= 3) { start = args[0] as number; stop = args[1] as number; step = args[2] as number; }
+      const res: number[] = [];
+      if (step > 0) for (let i = start; i < stop; i += step) res.push(i);
+      else if (step < 0) for (let i = start; i > stop; i += step) res.push(i);
+      return res;
+    });
+    def("uzunlik", (args) => {
+      const v = args[0];
+      if (typeof v === "string") return v.length;
+      if (Array.isArray(v)) return v.length;
+      if (v instanceof MittiObject) return v.map.size;
+      throw new MittiRuntimeError(`uzunlik() '${typeName(v)}' uchun ishlamaydi`, 0);
+    });
+    def("tur", (args) => typeName(args[0]));
+    def("satr", (args) => stringify(args[0]));
+    def("son", (args) => {
+      const v = args[0];
+      if (typeof v === "number") return Math.trunc(v);
+      if (typeof v === "string") { const n = parseInt(v, 10); if (Number.isNaN(n)) throw new MittiRuntimeError(`'${v}' ni songa aylantirib bo'lmadi`, 0); return n; }
+      if (typeof v === "boolean") return v ? 1 : 0;
+      throw new MittiRuntimeError(`son() '${typeName(v)}' uchun ishlamaydi`, 0);
+    });
+    def("haqiqiy", (args) => {
+      const v = args[0];
+      if (typeof v === "number") return v;
+      if (typeof v === "string") { const n = parseFloat(v); if (Number.isNaN(n)) throw new MittiRuntimeError(`'${v}' ni songa aylantirib bo'lmadi`, 0); return n; }
+      throw new MittiRuntimeError(`haqiqiy() '${typeName(v)}' uchun ishlamaydi`, 0);
+    });
+    def("yuqori", (args) => String(args[0]).toUpperCase());
+    def("quyi", (args) => String(args[0]).toLowerCase());
+    def("abs_qiymat", (args) => Math.abs(args[0] as number));
+    def("yaxlitla", (args) => Math.round(args[0] as number));
   }
 }
 

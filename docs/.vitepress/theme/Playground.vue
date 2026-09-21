@@ -3,25 +3,24 @@ import { ref, computed } from 'vue'
 import { executeMittiInBrowser } from '../../../src/web/runner.js'
 
 const examples = {
-  fib: `# 1. Fibonacci ketma-ketligi (Haqiqiy interpreterda ishlaydi)
-func fibonacci(n: int) -> int:
-    if n <= 1:
-        return n
-    return fibonacci(n - 1) + fibonacci(n - 2)
+  fib: `# 1. Fibonacci ketma-ketligi
+func fibonacci(n):
+    agar n <= 1:
+        qaytarish n
+    qaytarish fibonacci(n - 1) + fibonacci(n - 2)
 
-print("Fibonacci natijalari (0..9):")
-for i in range(10):
-    print(fibonacci(i))`,
+chop("Fibonacci natijalari (0..9):")
+uchun i in oraliq(10):
+    chop(fibonacci(i))`,
 
   fact: `# 2. Rekursiv faktorial hisoblash
-func factorial(n: int) -> int:
-    if n <= 1:
-        return 1
-    return n * factorial(n - 1)
+func faktorial(n):
+    agar n <= 1:
+        qaytarish 1
+    qaytarish n * faktorial(n - 1)
 
-print("5! =", factorial(5))
-print("7! =", factorial(7))
-print("10! =", factorial(10))`,
+uchun i in oraliq(1, 11):
+    chop(satr(i) + "! = " + satr(faktorial(i)))`,
 
   ds: `# 3. Massivlar va Lug'at (Obyektlar)
 foydalanuvchi = {
@@ -30,21 +29,21 @@ foydalanuvchi = {
     kasb: "Dasturchi"
 }
 
-print("Foydalanuvchi:", foydalanuvchi.ism, "—", foydalanuvchi.kasb)
+chop("Foydalanuvchi:", foydalanuvchi.ism, "—", foydalanuvchi.kasb)
 
 ballar = [85, 92, 78, 96]
 push(ballar, 100)
-print("Jami ballar soni:", len(ballar))
-print("Ro'yxat:", ballar)`,
+chop("Jami ballar soni:", uzunlik(ballar))
+chop("Ro'yxat:", ballar)`,
 
-  custom: `# 4. O'zingiz xohlagan kodni yozing va sinab ko'ring!
+  custom: `# 4. O'zingiz xohlagan kodni yozing!
 x = 100
 y = 25
-print("Yig'indi:", x + y)
-print("Ko'paytma:", x * y)
+chop("Yig'indi:", x + y)
+chop("Ko'paytma:", x * y)
 
-for i in range(5):
-    print("Qadam:", i * 10)`
+uchun i in oraliq(5):
+    chop("Qadam:", i * 10)`
 }
 
 const selectedExample = ref('fib')
@@ -368,3 +367,4 @@ function clearOutput() {
   white-space: pre-wrap;
 }
 </style>
+

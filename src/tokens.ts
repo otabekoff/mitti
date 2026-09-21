@@ -100,4 +100,22 @@ export const KEYWORDS: Record<string, TokenType> = {
   finally: TokenType.FINALLY,
   raise: TokenType.RAISE,
   throw: TokenType.THROW,
+
+  // === O'zbek tilidagi kalit so'zlar (Uzbek keyword aliases) ===
+  uchun: TokenType.FOR,         // for
+  agar: TokenType.IF,           // if
+  aks_holda: TokenType.ELIF,    // elif
+  aks: TokenType.ELSE,          // else
+  qaytarish: TokenType.RETURN,  // return
+  "to'xtatish": TokenType.BREAK,// break
+  davom: TokenType.CONTINUE,    // continue
+  sinab: TokenType.TRY,         // try (sinab ko'r)
+  istisno: TokenType.EXCEPT,    // except
+  nihoyat: TokenType.FINALLY,   // finally
+  ko_tar: TokenType.RAISE,      // ko'tar (raise)
+  va: TokenType.AND,            // and
+  yoki: TokenType.OR,           // or
+  emas: TokenType.NOT,          // not
+  dan: TokenType.FROM,          // from
+  sifatida: TokenType.AS,       // as
 };
