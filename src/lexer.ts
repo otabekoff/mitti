@@ -206,6 +206,7 @@ export class Lexer {
       "-=": TokenType.MINUS_EQ,
       "*=": TokenType.STAR_EQ,
       "/=": TokenType.SLASH_EQ,
+      "->": TokenType.ARROW,
     };
     if (twoCharMap[two]) {
       this.advance();

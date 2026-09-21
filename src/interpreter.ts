@@ -10,6 +10,7 @@ import {
   MittiFunction,
   NativeFunction,
   MittiRuntimeError,
+  MittiTypeError,
   MittiUserException,
   CallFrame,
   ReturnSignal,
@@ -18,6 +19,7 @@ import {
   isTruthy,
   stringify,
   typeName,
+  checkType,
 } from "./runtime.js";
 
 export class Interpreter {
@@ -97,7 +99,7 @@ export class Interpreter {
       }
 
       case "FunctionDecl": {
-        const fn = new MittiFunction(stmt.name, stmt.params, stmt.body, env);
+        const fn = new MittiFunction(stmt.name, stmt.params, stmt.body, env, stmt.returnType);
         env.define(stmt.name, fn);
         return;
       }
@@ -228,7 +230,7 @@ export class Interpreter {
       }
 
       case "FunctionExpr": {
-        const fn = new MittiFunction(expr.name, expr.params, expr.body, env);
+        const fn = new MittiFunction(expr.name, expr.params, expr.body, env, expr.returnType);
         if (expr.name) env.define(expr.name, fn);
         return fn;
       }
@@ -343,6 +345,19 @@ export class Interpreter {
       newValue = this.applyCompound(current, rhs, binOp, expr.line);
     }
 
+    // Tip annotatsiyasi tekshiruvi: x: int = 10
+    if (expr.typeAnnotation) {
+      try {
+        checkType(newValue, expr.typeAnnotation, expr.line,
+          expr.target.kind === "Identifier" ? expr.target.name : undefined);
+      } catch (e) {
+        if (e instanceof MittiTypeError) {
+          e.callStack = [...this.callStack];
+        }
+        throw e;
+      }
+    }
+
     const target = expr.target;
     if (target.kind === "Identifier") {
       env.assign(target.name, newValue, expr.line);
@@ -431,7 +446,20 @@ export class Interpreter {
   private callFunction(fn: MittiFunction, args: MittiValue[], line: number): MittiValue {
     const callEnv = new Environment(fn.closure);
     for (let i = 0; i < fn.params.length; i++) {
-      callEnv.define(fn.params[i], args[i] ?? null);
+      const param = fn.params[i];
+      const argVal = args[i] ?? null;
+      // Parametr tip tekshiruvi
+      if (param.typeAnnotation) {
+        try {
+          checkType(argVal, param.typeAnnotation, line, param.name);
+        } catch (e) {
+          if (e instanceof MittiTypeError) {
+            e.callStack = [...this.callStack];
+          }
+          throw e;
+        }
+      }
+      callEnv.define(param.name, argVal);
     }
     this.callStack.push({
       fnName: fn.name ?? "<anonim>",
@@ -441,7 +469,20 @@ export class Interpreter {
     try {
       this.execBlock(fn.body, callEnv);
     } catch (e) {
-      if (e instanceof ReturnSignal) return e.value;
+      if (e instanceof ReturnSignal) {
+        // Return tipi tekshiruvi
+        if (fn.returnType) {
+          try {
+            checkType(e.value, fn.returnType, line, `${fn.name ?? "<anonim>"} return`);
+          } catch (te) {
+            if (te instanceof MittiTypeError) {
+              te.callStack = [...this.callStack];
+            }
+            throw te;
+          }
+        }
+        return e.value;
+      }
       if (e instanceof MittiRuntimeError) {
         if (e.callStack.length === 0) e.callStack = [...this.callStack];
       } else if (e instanceof MittiUserException) {

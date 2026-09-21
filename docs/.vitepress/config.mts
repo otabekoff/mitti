@@ -21,6 +21,7 @@ export default defineConfig({
           { text: 'Modullar tizimi (Modules)', link: '/guide/modules' },
           { text: 'Fayllar bilan ishlash (File I/O)', link: '/guide/file-io' },
           { text: 'Xatolarni boshqarish (try/except)', link: '/guide/errors' },
+          { text: 'Ixtiyoriy tiplash (Typing)', link: '/guide/typing' },
           { text: 'Built-in funksiyalar', link: '/guide/builtins' }
         ]
       },
@@ -38,7 +39,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Mitti dasturlash tili — v0.3.0',
+      message: 'Mitti dasturlash tili — v0.4.0',
       copyright: 'Mitti jamoasi tomonidan ochiq manba bilan yaratilgan'
     }
   }

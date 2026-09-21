@@ -5,7 +5,8 @@ import * as readline from "readline";
 import { Lexer, MittiSyntaxError } from "./lexer.js";
 import { Parser } from "./parser.js";
 import { Interpreter } from "./interpreter.js";
-import { MittiRuntimeError, MittiUserException, stringify } from "./runtime.js";
+import { MittiRuntimeError, MittiUserException, MittiTypeError, stringify } from "./runtime.js";
+import { Linter } from "./linter.js";
 
 function runSource(src: string, interp: Interpreter) {
   const tokens = new Lexer(src).tokenize();
@@ -29,6 +30,10 @@ function runFile(filePath: string) {
       console.error(e.message);
       process.exit(1);
     }
+    if (e instanceof MittiTypeError) {
+      console.error(e.formatWithStack(resolved, src.split("\n")));
+      process.exit(1);
+    }
     if (e instanceof MittiRuntimeError || e instanceof MittiUserException) {
       console.error(e.formatWithStack(resolved, src.split("\n")));
       process.exit(1);
@@ -38,7 +43,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.3 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v0.4 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -147,14 +152,51 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
 } else if (args[0] === "-v" || args[0] === "--version") {
-  console.log("Mitti v0.3.0");
+  console.log("Mitti v0.4.0");
 } else if (args[0] === "-h" || args[0] === "--help") {
-  console.log("Mitti dasturlash tili — v0.3.0");
+  console.log("Mitti dasturlash tili — v0.4.0");
   console.log("Ishlatish: mitti [fayl.mt]");
+  console.log("Buyruqlar:");
+  console.log("  lint <fayl.mt>   Statik tahlil (linter)");
   console.log("Variantlar:");
   console.log("  -e, --eval <code> Kod satrini to'g'ridan-to'g'ri bajarish");
-  console.log("  -v, --version    Versiyani ko'rsatish");
-  console.log("  -h, --help       Yordam");
+  console.log("  -v, --version     Versiyani ko'rsatish");
+  console.log("  -h, --help        Yordam");
+} else if (args[0] === "lint") {
+  // mitti lint <file.mt>
+  if (args.length < 2) {
+    console.error("Xato: lint buyrug'i fayl yo'lini talab qiladi");
+    process.exit(1);
+  }
+  const lintPath = path.resolve(args[1]);
+  if (!fs.existsSync(lintPath)) {
+    console.error(`Xato: fayl topilmadi: ${args[1]}`);
+    process.exit(1);
+  }
+  const lintSrc = fs.readFileSync(lintPath, "utf-8");
+  let lintTokens, lintProgram;
+  try {
+    lintTokens = new Lexer(lintSrc).tokenize();
+    lintProgram = new Parser(lintTokens).parseProgram();
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    throw e;
+  }
+  const diagnostics = new Linter().lint(lintProgram);
+  if (diagnostics.length === 0) {
+    console.log(`✓ ${args[1]}: xato topilmadi`);
+    process.exit(0);
+  }
+  let hasErrors = false;
+  for (const d of diagnostics) {
+    const prefix = d.level === "xato" ? "xato" : "ogohlantirish";
+    console.log(`${prefix} [${d.line}-qator]: ${d.message}`);
+    if (d.level === "xato") hasErrors = true;
+  }
+  process.exit(hasErrors ? 1 : 0);
 } else if (args[0] === "-e" || args[0] === "--eval") {
   if (args.length < 2) {
     console.error("Xato: -e parametri kod satrini talab qiladi");
@@ -166,6 +208,10 @@ if (args.length === 0) {
   } catch (e) {
     if (e instanceof MittiSyntaxError) {
       console.error(e.message);
+      process.exit(1);
+    }
+    if (e instanceof MittiTypeError) {
+      console.error(e.formatWithStack(undefined, args[1].split("\n")));
       process.exit(1);
     }
     if (e instanceof MittiRuntimeError || e instanceof MittiUserException) {

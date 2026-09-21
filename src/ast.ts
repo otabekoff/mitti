@@ -29,12 +29,34 @@ export interface UnaryExpr { kind: "UnaryExpr"; operator: string; argument: Expr
 export interface BinaryExpr { kind: "BinaryExpr"; operator: string; left: Expr; right: Expr; line: number; }
 export interface LogicalExpr { kind: "LogicalExpr"; operator: "and" | "or"; left: Expr; right: Expr; line: number; }
 
-export interface AssignExpr { kind: "AssignExpr"; operator: string; target: Expr; value: Expr; line: number; }
+// Tip annotatsiyali o'zgaruvchi: x: int = 10
+export interface AssignExpr {
+  kind: "AssignExpr";
+  operator: string;
+  target: Expr;
+  value: Expr;
+  typeAnnotation?: string; // masalan "int", "str", "float", "bool", "list", "obj", "any"
+  line: number;
+}
 
 export interface CallExpr { kind: "CallExpr"; callee: Expr; args: Expr[]; line: number; }
 export interface IndexExpr { kind: "IndexExpr"; object: Expr; index: Expr; line: number; }
 export interface MemberExpr { kind: "MemberExpr"; object: Expr; property: string; line: number; }
-export interface FunctionExpr { kind: "FunctionExpr"; name: string | null; params: string[]; body: BlockStmt; line: number; }
+
+// Funksiya parametri: ixtiyoriy tip annotatsiyasi bilan
+export interface TypedParam {
+  name: string;
+  typeAnnotation?: string; // masalan "int", "str"
+}
+
+export interface FunctionExpr {
+  kind: "FunctionExpr";
+  name: string | null;
+  params: TypedParam[];
+  returnType?: string; // masalan "int", "str"
+  body: BlockStmt;
+  line: number;
+}
 
 // ===== Statements =====
 
@@ -92,7 +114,16 @@ export interface IfStmt {
 }
 export interface WhileStmt { kind: "WhileStmt"; condition: Expr; body: BlockStmt; line: number; }
 export interface ForStmt { kind: "ForStmt"; varName: string; iterable: Expr; body: BlockStmt; line: number; }
-export interface FunctionDecl { kind: "FunctionDecl"; name: string; params: string[]; body: BlockStmt; line: number; }
+
+export interface FunctionDecl {
+  kind: "FunctionDecl";
+  name: string;
+  params: TypedParam[];
+  returnType?: string; // masalan "int", "str"
+  body: BlockStmt;
+  line: number;
+}
+
 export interface ReturnStmt { kind: "ReturnStmt"; value: Expr | null; line: number; }
 export interface BreakStmt { kind: "BreakStmt"; line: number; }
 export interface ContinueStmt { kind: "ContinueStmt"; line: number; }

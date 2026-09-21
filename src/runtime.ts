@@ -17,9 +17,10 @@ export class MittiObject {
 export class MittiFunction {
   constructor(
     public name: string | null,
-    public params: string[],
+    public params: A.TypedParam[],
     public body: A.BlockStmt,
-    public closure: Environment
+    public closure: Environment,
+    public returnType?: string  // ixtiyoriy return tipi
   ) {}
 }
 
@@ -31,6 +32,86 @@ export interface CallFrame {
   fnName: string;
   file?: string;
   line: number;
+}
+
+// Tip tekshiruvi xatosi
+export class MittiTypeError extends Error {
+  public callStack: CallFrame[] = [];
+
+  constructor(message: string, public line: number) {
+    super(`Tip xatosi (${line}-qator): ${message}`);
+  }
+
+  formatWithStack(file?: string, sourceLines?: string[]): string {
+    const parts: string[] = [];
+    parts.push(`Tip xatosi: ${this.message.replace(/^Tip xatosi \(\d+-qator\): /, "")}`);
+    if (file) {
+      parts.push(`  fayl: ${file}, ${this.line}-qatorda`);
+    } else {
+      parts.push(`  ${this.line}-qatorda`);
+    }
+    if (sourceLines && this.line > 0 && this.line <= sourceLines.length) {
+      const codeLine = sourceLines[this.line - 1];
+      parts.push(`    ${this.line} | ${codeLine}`);
+    }
+    if (this.callStack.length > 0) {
+      parts.push("Traceback (chaqiruvlar steki):");
+      for (let i = this.callStack.length - 1; i >= 0; i--) {
+        const frame = this.callStack[i];
+        const fStr = frame.file ? `${frame.file}:` : "";
+        parts.push(`  -> ${frame.fnName} (${fStr}${frame.line}-qator)`);
+      }
+    }
+    return parts.join("\n");
+  }
+}
+
+/**
+ * Qiymatning tipini annotatsiya bilan tekshiradi.
+ * Mos kelmasa MittiTypeError chiqaradi.
+ * Noma'lum annotatsiya bo'lsa — ogohlantirish yozadi, xato emas.
+ */
+export function checkType(value: MittiValue, annotation: string, line: number, context?: string): void {
+  const label = context ? `'${context}'` : "qiymat";
+  let ok = true;
+  switch (annotation) {
+    case "int":
+      ok = typeof value === "number" && Number.isInteger(value);
+      if (!ok) {
+        throw new MittiTypeError(
+          `${label} uchun 'int' tipi kutilgan, '${typeName(value)}' keldi${typeof value === "number" ? " (butun son emas)" : ""}`,
+          line
+        );
+      }
+      break;
+    case "float":
+      ok = typeof value === "number";
+      if (!ok) throw new MittiTypeError(`${label} uchun 'float' tipi kutilgan, '${typeName(value)}' keldi`, line);
+      break;
+    case "str":
+      ok = typeof value === "string";
+      if (!ok) throw new MittiTypeError(`${label} uchun 'str' tipi kutilgan, '${typeName(value)}' keldi`, line);
+      break;
+    case "bool":
+      ok = typeof value === "boolean";
+      if (!ok) throw new MittiTypeError(`${label} uchun 'bool' tipi kutilgan, '${typeName(value)}' keldi`, line);
+      break;
+    case "list":
+      ok = Array.isArray(value);
+      if (!ok) throw new MittiTypeError(`${label} uchun 'list' tipi kutilgan, '${typeName(value)}' keldi`, line);
+      break;
+    case "obj":
+      ok = value instanceof MittiObject;
+      if (!ok) throw new MittiTypeError(`${label} uchun 'obj' tipi kutilgan, '${typeName(value)}' keldi`, line);
+      break;
+    case "any":
+      // har doim to'g'ri
+      break;
+    default:
+      // noma'lum tip nomi — ogohlantirish chiqaramiz, bajarishni to'xtatmaymiz
+      // (kelajakda foydalanuvchi tipi bo'lishi mumkin)
+      break;
+  }
 }
 
 export class MittiRuntimeError extends Error {
@@ -158,11 +239,11 @@ export function isTruthy(v: MittiValue): boolean {
 
 export function typeName(v: MittiValue): string {
   if (v === null) return "null";
-  if (typeof v === "number") return "son";
-  if (typeof v === "string") return "satr";
-  if (typeof v === "boolean") return "mantiqiy";
-  if (Array.isArray(v)) return "massiv";
-  if (v instanceof MittiObject) return "obyekt";
+  if (typeof v === "number") return Number.isInteger(v) ? "int" : "float";
+  if (typeof v === "string") return "str";
+  if (typeof v === "boolean") return "bool";
+  if (Array.isArray(v)) return "list";
+  if (v instanceof MittiObject) return "obj";
   if (v instanceof MittiFunction || v instanceof NativeFunction) return "funksiya";
   return "noma'lum";
 }

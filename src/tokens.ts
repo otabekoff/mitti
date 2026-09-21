@@ -60,6 +60,7 @@ export enum TokenType {
   COMMA = "COMMA",
   COLON = "COLON",
   DOT = "DOT",
+  ARROW = "ARROW", // ->
 
   NEWLINE = "NEWLINE",
   INDENT = "INDENT",

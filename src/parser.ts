@@ -133,19 +133,38 @@ export class Parser {
     return { kind: "ForStmt", varName, iterable, body, line };
   }
 
+  // Funksiya parametrini tip annotatsiyasi bilan parse qiladi
+  private parseParams(): A.TypedParam[] {
+    const params: A.TypedParam[] = [];
+    if (!this.check(T.RPAREN)) {
+      do {
+        const name = this.expect(T.IDENT, "parametr nomi kutilgan edi").value;
+        let typeAnnotation: string | undefined = undefined;
+        // Parametr annotatsiyasi: a: int
+        if (this.check(T.COLON)) {
+          this.advance(); // ':'
+          typeAnnotation = this.expect(T.IDENT, "tip nomi kutilgan edi").value;
+        }
+        params.push({ name, typeAnnotation });
+      } while (this.match(T.COMMA));
+    }
+    return params;
+  }
+
   private functionDecl(): A.FunctionDecl {
     const line = this.advance().line; // 'func'
     const name = this.expect(T.IDENT, "funksiya nomi kutilgan edi").value;
     this.expect(T.LPAREN, "'(' kutilgan edi");
-    const params: string[] = [];
-    if (!this.check(T.RPAREN)) {
-      do {
-        params.push(this.expect(T.IDENT, "parametr nomi kutilgan edi").value);
-      } while (this.match(T.COMMA));
-    }
+    const params = this.parseParams();
     this.expect(T.RPAREN, "')' kutilgan edi");
+    // Return tipi: -> int
+    let returnType: string | undefined = undefined;
+    if (this.check(T.ARROW)) {
+      this.advance(); // '->'
+      returnType = this.expect(T.IDENT, "return tipi kutilgan edi").value;
+    }
     const body = this.block();
-    return { kind: "FunctionDecl", name, params, body, line };
+    return { kind: "FunctionDecl", name, params, returnType, body, line };
   }
 
   private returnStatement(): A.ReturnStmt {
@@ -290,6 +309,28 @@ export class Parser {
       [T.STAR_EQ]: "*=",
       [T.SLASH_EQ]: "/=",
     };
+
+    // Tip annotatsiyali o'zgaruvchi: x: int = 10
+    // Faqat oddiy Identifier uchun va navbatdagi token COLON bo'lsa
+    if (expr.kind === "Identifier" && this.check(T.COLON)) {
+      this.advance(); // ':'
+      const typeAnnotation = this.expect(T.IDENT, "tip nomi kutilgan edi").value;
+      // = kutiladi
+      if (!this.check(T.EQ)) {
+        throw new MittiSyntaxError("tip annotatsiyasidan so'ng '=' kutilgan edi", this.peek().line, this.peek().col);
+      }
+      this.advance(); // '='
+      const value = this.assignment();
+      return {
+        kind: "AssignExpr",
+        operator: "=",
+        target: expr,
+        value,
+        typeAnnotation,
+        line: expr.line,
+      };
+    }
+
     if ([T.EQ, T.PLUS_EQ, T.MINUS_EQ, T.STAR_EQ, T.SLASH_EQ].includes(this.peek().type)) {
       const opTok = this.advance();
       const value = this.assignment();
@@ -442,15 +483,15 @@ export class Parser {
     let name: string | null = null;
     if (this.check(T.IDENT)) name = this.advance().value;
     this.expect(T.LPAREN, "'(' kutilgan edi");
-    const params: string[] = [];
-    if (!this.check(T.RPAREN)) {
-      do {
-        params.push(this.expect(T.IDENT, "parametr nomi kutilgan edi").value);
-      } while (this.match(T.COMMA));
-    }
+    const params = this.parseParams();
     this.expect(T.RPAREN, "')' kutilgan edi");
+    let returnType: string | undefined = undefined;
+    if (this.check(T.ARROW)) {
+      this.advance(); // '->'
+      returnType = this.expect(T.IDENT, "return tipi kutilgan edi").value;
+    }
     const body = this.block();
-    return { kind: "FunctionExpr", name, params, body, line };
+    return { kind: "FunctionExpr", name, params, returnType, body, line };
   }
 
   private arrayLit(): A.ArrayLit {

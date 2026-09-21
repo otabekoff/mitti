@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.3.0-blue.svg" alt="Version 0.3.0" />
+  <img src="https://img.shields.io/badge/version-0.4.0-blue.svg" alt="Version 0.4.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
   <img src="https://img.shields.io/badge/ESM-Native-purple" alt="ESM" />
@@ -64,12 +64,18 @@ Development rejimida (build qilmasdan to'g'ridan-to'g'ri `tsx` orqali):
 npm run dev examples/error_handling.mt
 ```
 
-### 2. Tezkor Kod Bajarish (`-e, --eval`)
+### 2. Statik Tahlilchi (Linter)
+Kodni bajarmasdan oldin sintaksis, ishlatilmagan importlar, aniqlanmagan o'zgaruvchilar va tip nomuvofiqliklarini tekshirish:
 ```bash
-node dist/main.js -e "print(10 + 20)"
+node dist/main.js lint examples/typing.mt
 ```
 
-### 3. Interaktiv REPL (Read-Eval-Print Loop)
+### 3. Tezkor Kod Bajarish (`-e, --eval`)
+```bash
+node dist/main.js -e "x: int = 10; print(x * 2)"
+```
+
+### 4. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
@@ -77,8 +83,8 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.3 — chiqish uchun 'exit' yoki Ctrl+D
-> x = 10
+Mitti REPL v0.4 — chiqish uchun 'exit' yoki Ctrl+D
+> x: int = 10
 10
 > x * 2
 20
@@ -93,8 +99,18 @@ Xato: nolga bo'lish mumkin emas
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.3.0)
+## 🌟 Til imkoniyatlari (v0.4.0)
 
+- **Statik Ixtiyoriy Tiplash (Gradual Typing)**:
+  - O'zgaruvchi annotatsiyalari: `x: int = 10`, `nom: str = "Mitti"`, `nisbat: float = 3.14`, `faol: bool = true`, `ro'yxat: list = []`, `sozlama: obj = {}`, `ixtiyoriy: any`
+  - Funksiya parametr va return turlari: `func hisob(a: int, b: int) -> int:`
+  - Runtime tip tekshiruvi: noto'g'ri tip uzatilganda aniq `MittiTypeError` va stack trace
+- **Statik Linter (`mitti lint`)**:
+  - Kodni bajarmasdan oldin AST darajasida tezkor tahlil
+  - Aniqlanmagan o'zgaruvchilar (undefined variables)
+  - Ishlatilmagan importlar (unused imports)
+  - Literal va annotatsiya nomuvofiqligi (type mismatch)
+  - Return tipi e'lon qilingan funksiyalarda `return` mavjudligi
 - **Xatolarni boshqarish (Exception Handling)**:
   - `try / except (e) / finally` bloklari
   - `raise "Xatolik"` va `throw "Xatolik"` ifodalari
@@ -125,32 +141,17 @@ Xato: nolga bo'lish mumkin emas
 ## 📝 Sintaksis namunasi
 
 ```python
-# O'zgaruvchilar va arifmetika
-nom = "Mitti"
-versiya = 0.1
-
-# Funksiyalar va rekursiya
-func fibonacci(n):
+# Tip annotatsiyalari bilan funksiya
+func factorial(n: int) -> int:
     if n <= 1:
-        return n
-    return fibonacci(n - 1) + fibonacci(n - 2)
+        return 1
+    return n * factorial(n - 1)
 
-# Sikllar va shartlar
-natijalar = []
-for i in range(10):
-    push(natijalar, fibonacci(i))
+jami: int = 0
+for i in range(1, 6):
+    jami += factorial(i)
 
-print("Fibonacci ketma-ketligi:")
-print(natijalar)
-
-# Obyektlar (Maps)
-talaba = {
-    ism: "Vali",
-    kurs: 3,
-    fanlar: ["Matematika", "Dasturlash"]
-}
-
-print(talaba.ism + " — " + str(talaba.kurs) + "-kurs talabasi")
+print("Faktoriallar yig'indisi:", jami)
 ```
 
 ---
@@ -177,21 +178,23 @@ npm run docs:build
 Mitti/
 ├── docs/                 # VitePress asosidagi to'liq hujjatlar
 │   ├── .vitepress/       # VitePress konfiguratsiyasi
-│   ├── guide/            # Qo'llanmalar (syntax, builtins, internals, roadmap)
+│   ├── guide/            # Qo'llanmalar (syntax, modules, errors, typing, roadmap)
 │   └── index.md          # Hujjatlar bosh sahifasi
 ├── examples/             # Mitti kod namunalari (*.mt)
 │   ├── modules/          # Modullar namunalari (math_utils.mt, main.mt)
+│   ├── error_handling.mt # Xatolarni boshqarish namunasi
+│   ├── typing.mt         # Statik tiplash namunasi
 │   ├── file_io.mt        # Fayllar bilan ishlash namunasi
-│   ├── hello.mt          # Asosiy xususiyatlar namunasi
-│   └── tests.mt          # Qo'shimcha testlar va closures
+│   └── hello.mt          # Asosiy xususiyatlar namunasi
 ├── src/                  # Interpreter manba kodi (TypeScript)
 │   ├── tokens.ts         # Token turlari va kalit so'zlar
 │   ├── lexer.ts          # Lexer (indentatsiya tracking)
-│   ├── ast.ts            # AST tugun interfeyslari
-│   ├── parser.ts         # Recursive-descent parser
-│   ├── runtime.ts        # Muhit (Environment), Scope va Qiymatlar
-│   ├── interpreter.ts    # Tree-walking interpreter + Built-in funksiyalar + Modullar + I/O
-│   └── main.ts           # CLI va interaktiv REPL
+│   ├── ast.ts            # AST tugun interfeyslari (TypedParam, Annotations)
+│   ├── parser.ts         # Recursive-descent parser (tiplarni o'qish)
+│   ├── runtime.ts        # Muhit (Environment), MittiTypeError va checkType()
+│   ├── interpreter.ts    # Tree-walking interpreter + Runtime type checking
+│   ├── linter.ts         # Statik tahlilchi (undefined vars, unused imports, type mismatch)
+│   └── main.ts           # CLI (run, eval, lint) va interaktiv REPL
 ├── package.json          # Loyiha konfiguratsiyasi va scriptlar
 ├── tsconfig.json         # TypeScript konfiguratsiyasi
 └── README.md             # Loyiha tavsifi
@@ -204,7 +207,7 @@ Mitti/
 - [x] **v0.1.0**: Tree-walk interpreter, Python-uslub sintaksis, 24 built-in funksiya, closures, massiv/obyektlar, CLI & REPL
 - [x] **v0.2.0**: Modullar tizimi (`import`, `from-import`, `as`), standart modullar (`math`, `os`, `json`), fayl I/O (`read_file`, `write_file`, `append_file`, `file_exists`, `remove_file`)
 - [x] **v0.3.0**: ESM (`"type": "module"`), xatolarni boshqarish (`try / except / finally`), maxsus xatolar (`raise / throw`), vizual Call Stack Trace
-- [ ] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter
+- [x] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter (`mitti lint`)
 - [ ] **v0.5.0**: LSP (Language Server Protocol) — VS Code kengaytmasi
 - [ ] **v0.6.0**: Bytecode VM — tezlikni oshirish uchun virtual mashina
 - [ ] **v1.0.0**: Native va WebAssembly (WASM) kompilyatsiyasi
