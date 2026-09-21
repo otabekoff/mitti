@@ -18,7 +18,10 @@
     "dev": "tsx src/main.ts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "build:bin": "bun build src/main.ts --compile --outfile dist/mitti.exe",
+    "sign:bin": "powershell -ExecutionPolicy Bypass -File scripts/sign.ps1 -FilePath dist/mitti.exe",
+    "build:installer": "makensis installer/mitti.nsi"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",

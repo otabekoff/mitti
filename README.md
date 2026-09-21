@@ -41,33 +41,38 @@ Source code (*.mt)
 
 ## 🚀 O'rnatish
 
-Tizimingizda [Node.js](https://nodejs.org) (v18+) o'rnatilgan bo'lishi lozim.
+### 1. Tezkor bir qatorli o'rnatish (Standalone binary — Node.js talab qilinmaydi!):
 
-### 1. Global o'rnatish (npm orqali):
+**Windows (PowerShell orqali):**
+```powershell
+irm https://raw.githubusercontent.com/otabekoff/mitti/master/install.ps1 | iex
+```
+
+**Linux va macOS (Terminal orqali):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/otabekoff/mitti/master/install.sh | bash
+```
+
+### 2. Windows Installer (Setup .exe & Portable ZIP):
+Rasmiy [GitHub Releases](https://github.com/otabekoff/mitti/releases/latest) sahifasidan:
+- `Mitti-Setup-x64.exe` — Windows uchun to'liq grafik o'rnatuvchi (avtomatik `PATH` ga qo'shadi va Start Menu yorliqlarini yaratadi)
+- `mitti-windows-x64.zip` — o'rnatishsiz to'g'ridan-to'g'ri ishlatiladigan portativ paket
+
+### 3. npm orqali (Node.js v18+):
 ```bash
 npm install -g otabekoff/mitti
 mitti --version
 ```
 
-### 2. VS Code kengaytmasini o'rnatish (.vsix):
-Rasmiy [GitHub Releases](https://github.com/otabekoff/mitti/releases/tag/v1.0.0) sahifasidan `mitti-vscode-1.0.0.vsix` faylini yuklab oling va o'rnating:
+### 4. VS Code kengaytmasini o'rnatish (.vsix):
+[GitHub Releases](https://github.com/otabekoff/mitti/releases/latest) sahifasidan `mitti-vscode-1.0.0.vsix` faylini yuklab oling:
 ```bash
 code --install-extension mitti-vscode-1.0.0.vsix
 ```
 Yoki VS Code ichida: **Extensions (Ctrl+Shift+X) ➔ `...` (yuqoridagi uch nuqta) ➔ Install from VSIX...**
 
-### 3. Manba kodidan o'rnatish:
-```bash
-git clone https://github.com/otabekoff/mitti.git
-cd mitti
-npm install
-npm run build
-npm link
-mitti --version
-```
-
-### 4. Brauzerda o'rnatmasdan sinab ko'rish:
-Interaktiv muharrir va haqiqiy interpreter: [Mitti Web Playground](https://otabekoff.github.io/mitti/playground.html)
+### 5. Brauzerda o'rnatmasdan sinab ko'rish:
+Interaktiv muharrir va real-vaqt sintaksis bo'yash: **[Mitti Web Playground](https://otabekoff.github.io/mitti/playground.html)**
 
 ---
 

@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 import mittiGrammar from '../../editors/vscode/syntaxes/mitti.tmLanguage.json' with { type: 'json' }
 
 export default defineConfig({
+  base: '/mitti/',
   title: "Mitti",
   description: "Oddiy, tez va ixcham interpreted dasturlash tili",
   markdown: {

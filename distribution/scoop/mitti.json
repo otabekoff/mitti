@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "description": "Mitti — Python-like interpreted programming language with WebAssembly & Bytecode VM support",
+  "homepage": "https://otabekoff.github.io/mitti",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/otabekoff/mitti/releases/download/v1.0.0/mitti-windows-x64.zip",
+      "bin": "mitti.exe"
+    }
+  },
+  "checkver": "github",
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/otabekoff/mitti/releases/download/v$version/mitti-windows-x64.zip"
+      }
+    }
+  }
+}

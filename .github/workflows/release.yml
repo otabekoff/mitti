@@ -1,0 +1,152 @@
+name: Release Mitti Binaries & Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows (Binary & NSIS Installer)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Compile TypeScript
+        run: npm run build
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build standalone mitti.exe
+        run: bun build src/main.ts --compile --outfile dist/mitti.exe
+
+      - name: Sign standalone binary
+        env:
+          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+        run: powershell -ExecutionPolicy Bypass -File scripts/sign.ps1 -FilePath dist/mitti.exe
+
+      - name: Create Windows Portable ZIP
+        run: Compress-Archive -Path dist/mitti.exe, LICENSE, README.md, examples -DestinationPath dist/mitti-windows-x64.zip -Force
+
+      - name: Compile NSIS Installer
+        run: makensis installer/mitti.nsi
+
+      - name: Sign NSIS Installer
+        env:
+          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+        run: powershell -ExecutionPolicy Bypass -File scripts/sign.ps1 -FilePath dist/Mitti-Setup-x64.exe
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-assets
+          path: |
+            dist/Mitti-Setup-x64.exe
+            dist/mitti-windows-x64.zip
+
+  build-unix:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: Linux x64
+            artifact: mitti-linux-x64
+          - os: macos-latest
+            target: macOS x64/arm64
+            artifact: mitti-macos-x64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build standalone binary
+        run: |
+          mkdir -p dist
+          bun build src/main.ts --compile --outfile dist/mitti
+          chmod +x dist/mitti
+
+      - name: Create tarball
+        run: |
+          tar -czvf dist/${{ matrix.artifact }}.tar.gz -C dist mitti LICENSE README.md examples
+
+      - name: Upload Unix Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}.tar.gz
+
+  build-vsix:
+    name: Build VS Code Extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Package VSIX
+        run: |
+          mkdir -p dist
+          cd editors/vscode
+          npx --yes @vscode/vsce package --no-dependencies --out ../../dist/mitti-vscode-1.0.0.vsix
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-asset
+          path: dist/mitti-vscode-1.0.0.vsix
+
+  publish-release:
+    name: Publish Release Assets to GitHub
+    needs: [build-windows, build-unix, build-vsix]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/Mitti-Setup-x64.exe
+            release-assets/mitti-windows-x64.zip
+            release-assets/mitti-linux-x64.tar.gz
+            release-assets/mitti-macos-x64.tar.gz
+            release-assets/mitti-vscode-1.0.0.vsix
+          draft: false
+          prerelease: false
+          generate_release_notes: true
