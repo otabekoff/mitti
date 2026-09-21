@@ -1,6 +1,6 @@
-import { Token, TokenType as T } from "./tokens";
-import * as A from "./ast";
-import { MittiSyntaxError } from "./lexer";
+import { Token, TokenType as T } from "./tokens.js";
+import * as A from "./ast.js";
+import { MittiSyntaxError } from "./lexer.js";
 
 export class Parser {
   private tokens: Token[];
@@ -66,6 +66,10 @@ export class Parser {
       case T.RETURN: return this.returnStatement();
       case T.IMPORT: return this.importStatement();
       case T.FROM: return this.fromStatement();
+      case T.TRY: return this.tryStatement();
+      case T.RAISE:
+      case T.THROW:
+        return this.raiseStatement();
       case T.BREAK:
         this.advance();
         this.endOfStatement();
@@ -218,6 +222,50 @@ export class Parser {
       specifiers,
       line: t.line,
     };
+  }
+
+  private tryStatement(): A.TryStmt {
+    const line = this.advance().line; // 'try'
+    const tryBlock = this.block();
+
+    let catchVar: string | undefined = undefined;
+    let exceptBlock: A.BlockStmt | undefined = undefined;
+    let finallyBlock: A.BlockStmt | undefined = undefined;
+
+    this.skipNewlines();
+    if (this.check(T.EXCEPT)) {
+      this.advance(); // 'except'
+      if (this.check(T.IDENT)) {
+        catchVar = this.advance().value;
+      }
+      exceptBlock = this.block();
+    }
+
+    this.skipNewlines();
+    if (this.check(T.FINALLY)) {
+      this.advance(); // 'finally'
+      finallyBlock = this.block();
+    }
+
+    if (!exceptBlock && !finallyBlock) {
+      throw new MittiSyntaxError("'try' dan so'ng kamida bitta 'except' yoki 'finally' bloki bo'lishi kerak", line, 1);
+    }
+
+    return {
+      kind: "TryStmt",
+      tryBlock,
+      catchVar,
+      exceptBlock,
+      finallyBlock,
+      line,
+    };
+  }
+
+  private raiseStatement(): A.RaiseStmt {
+    const line = this.advance().line; // 'raise' or 'throw'
+    const argument = this.expression();
+    this.endOfStatement();
+    return { kind: "RaiseStmt", argument, line };
   }
 
   private exprStatement(): A.ExprStmt {

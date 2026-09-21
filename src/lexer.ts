@@ -1,4 +1,4 @@
-import { Token, TokenType, KEYWORDS } from "./tokens";
+import { Token, TokenType, KEYWORDS } from "./tokens.js";
 
 class MittiSyntaxError extends Error {
   constructor(message: string, public line: number, public col: number) {

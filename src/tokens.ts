@@ -24,6 +24,11 @@ export enum TokenType {
   IMPORT = "IMPORT",
   FROM = "FROM",
   AS = "AS",
+  TRY = "TRY",
+  EXCEPT = "EXCEPT",
+  FINALLY = "FINALLY",
+  RAISE = "RAISE",
+  THROW = "THROW",
 
   // Operators / punctuation
   PLUS = "PLUS",
@@ -89,4 +94,9 @@ export const KEYWORDS: Record<string, TokenType> = {
   import: TokenType.IMPORT,
   from: TokenType.FROM,
   as: TokenType.AS,
+  try: TokenType.TRY,
+  except: TokenType.EXCEPT,
+  finally: TokenType.FINALLY,
+  raise: TokenType.RAISE,
+  throw: TokenType.THROW,
 };

@@ -13,3 +13,4 @@ func yigindi(arr):
     for x in arr:
         s += x
     return s
+

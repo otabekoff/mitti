@@ -45,3 +45,4 @@ print("Fayl o'chirildi. Mavjudmi:", file_exists(fayl)) # false
 
 - **Nisbiy yo'llar (`./`, `../`)**: Agar kod fayl ichida bajarilayotgan bo'lsa (`node dist/main.js papka/app.mt`), nisbiy yo'llar o'sha fayl turgan katalogga nisbatan hisoblanadi.
 - **Mutlaq yo'llar**: Masalan, `C:/data/file.txt` yoki `/var/log/app.log` to'g'ridan-to'g'ri ko'rsatilishi mumkin.
+

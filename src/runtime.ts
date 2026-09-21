@@ -1,4 +1,4 @@
-import * as A from "./ast";
+import * as A from "./ast.js";
 
 export type MittiValue =
   | number
@@ -27,9 +27,77 @@ export class NativeFunction {
   constructor(public name: string, public fn: (args: MittiValue[]) => MittiValue) {}
 }
 
+export interface CallFrame {
+  fnName: string;
+  file?: string;
+  line: number;
+}
+
 export class MittiRuntimeError extends Error {
+  public callStack: CallFrame[] = [];
+  public rawMessage: string;
+
   constructor(message: string, public line: number) {
     super(`Ishga tushirish xatosi (${line}-qator): ${message}`);
+    this.rawMessage = message;
+  }
+
+  formatWithStack(file?: string, sourceLines?: string[]): string {
+    const parts: string[] = [];
+    parts.push(`Xatolik: ${this.rawMessage}`);
+    if (file) {
+      parts.push(`  fayl: ${file}, ${this.line}-qatorda`);
+    } else {
+      parts.push(`  ${this.line}-qatorda`);
+    }
+
+    if (sourceLines && this.line > 0 && this.line <= sourceLines.length) {
+      const codeLine = sourceLines[this.line - 1];
+      parts.push(`    ${this.line} | ${codeLine}`);
+    }
+
+    if (this.callStack.length > 0) {
+      parts.push("Traceback (chaqiruvlar steki):");
+      for (let i = this.callStack.length - 1; i >= 0; i--) {
+        const frame = this.callStack[i];
+        const fStr = frame.file ? `${frame.file}:` : "";
+        parts.push(`  -> ${frame.fnName} (${fStr}${frame.line}-qator)`);
+      }
+    }
+    return parts.join("\n");
+  }
+}
+
+export class MittiUserException extends Error {
+  public callStack: CallFrame[] = [];
+
+  constructor(public value: MittiValue, public line: number) {
+    super(`Maxsus xatolik (${line}-qator): ${stringify(value)}`);
+  }
+
+  formatWithStack(file?: string, sourceLines?: string[]): string {
+    const parts: string[] = [];
+    parts.push(`Maxsus xatolik: ${stringify(this.value)}`);
+    if (file) {
+      parts.push(`  fayl: ${file}, ${this.line}-qatorda`);
+    } else {
+      parts.push(`  ${this.line}-qatorda`);
+    }
+
+    if (sourceLines && this.line > 0 && this.line <= sourceLines.length) {
+      const codeLine = sourceLines[this.line - 1];
+      parts.push(`    ${this.line} | ${codeLine}`);
+    }
+
+    if (this.callStack.length > 0) {
+      parts.push("Traceback (chaqiruvlar steki):");
+      for (let i = this.callStack.length - 1; i >= 0; i--) {
+        const frame = this.callStack[i];
+        const fStr = frame.file ? `${frame.file}:` : "";
+        parts.push(`  -> ${frame.fnName} (${fStr}${frame.line}-qator)`);
+      }
+    }
+    return parts.join("\n");
   }
 }
 

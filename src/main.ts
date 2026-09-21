@@ -2,10 +2,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
-import { Lexer, MittiSyntaxError } from "./lexer";
-import { Parser } from "./parser";
-import { Interpreter } from "./interpreter";
-import { MittiRuntimeError } from "./runtime";
+import { Lexer, MittiSyntaxError } from "./lexer.js";
+import { Parser } from "./parser.js";
+import { Interpreter } from "./interpreter.js";
+import { MittiRuntimeError, MittiUserException, stringify } from "./runtime.js";
 
 function runSource(src: string, interp: Interpreter) {
   const tokens = new Lexer(src).tokenize();
@@ -25,8 +25,12 @@ function runFile(filePath: string) {
   try {
     runSource(src, interp);
   } catch (e) {
-    if (e instanceof MittiSyntaxError || e instanceof MittiRuntimeError) {
+    if (e instanceof MittiSyntaxError) {
       console.error(e.message);
+      process.exit(1);
+    }
+    if (e instanceof MittiRuntimeError || e instanceof MittiUserException) {
+      console.error(e.formatWithStack(resolved, src.split("\n")));
       process.exit(1);
     }
     throw e;
@@ -34,7 +38,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.2 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v0.3 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -117,10 +121,10 @@ function execAndPrint(src: string, interp: Interpreter) {
 // natijasini environment orqali chiqaramiz.
 function replEvalHelper(interp: Interpreter) {
   return {
-    evalForRepl(expr: import("./ast").Expr) {
+    evalForRepl(expr: import("./ast.js").Expr) {
       // Vaqtinchalik o'zgaruvchiga yozib, keyin o'qib olamiz (hack, lekin ishlaydi)
       const tmpName = "__repl_tmp__";
-      const assign: import("./ast").AssignExpr = {
+      const assign: import("./ast.js").AssignExpr = {
         kind: "AssignExpr",
         operator: "=",
         target: { kind: "Identifier", name: tmpName, line: expr.line },
@@ -134,9 +138,7 @@ function replEvalHelper(interp: Interpreter) {
 }
 
 function stringifyForRepl(v: unknown): string {
-  // interpreter.ts dagi stringify bilan bir xil formatlash uchun runtime'dan foydalanamiz
-  const { stringify } = require("./runtime");
-  return stringify(v);
+  return stringify(v as import("./runtime.js").MittiValue);
 }
 
 // ============ ENTRY POINT ============
@@ -145,13 +147,33 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
 } else if (args[0] === "-v" || args[0] === "--version") {
-  console.log("Mitti v0.2.0");
+  console.log("Mitti v0.3.0");
 } else if (args[0] === "-h" || args[0] === "--help") {
-  console.log("Mitti dasturlash tili — v0.2.0");
+  console.log("Mitti dasturlash tili — v0.3.0");
   console.log("Ishlatish: mitti [fayl.mt]");
   console.log("Variantlar:");
+  console.log("  -e, --eval <code> Kod satrini to'g'ridan-to'g'ri bajarish");
   console.log("  -v, --version    Versiyani ko'rsatish");
   console.log("  -h, --help       Yordam");
+} else if (args[0] === "-e" || args[0] === "--eval") {
+  if (args.length < 2) {
+    console.error("Xato: -e parametri kod satrini talab qiladi");
+    process.exit(1);
+  }
+  const interp = new Interpreter();
+  try {
+    runSource(args[1], interp);
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    if (e instanceof MittiRuntimeError || e instanceof MittiUserException) {
+      console.error(e.formatWithStack(undefined, args[1].split("\n")));
+      process.exit(1);
+    }
+    throw e;
+  }
 } else {
   runFile(args[0]);
 }

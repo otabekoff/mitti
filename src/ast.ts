@@ -48,7 +48,24 @@ export type Stmt =
   | ReturnStmt
   | BreakStmt
   | ContinueStmt
-  | ImportStmt;
+  | ImportStmt
+  | TryStmt
+  | RaiseStmt;
+
+export interface TryStmt {
+  kind: "TryStmt";
+  tryBlock: BlockStmt;
+  catchVar?: string;
+  exceptBlock?: BlockStmt;
+  finallyBlock?: BlockStmt;
+  line: number;
+}
+
+export interface RaiseStmt {
+  kind: "RaiseStmt";
+  argument: Expr;
+  line: number;
+}
 
 export interface ImportSpecifier {
   imported: string;

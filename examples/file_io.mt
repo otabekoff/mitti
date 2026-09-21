@@ -20,3 +20,4 @@ print(matn)
 # 5. Faylni o'chirish (tozalash)
 remove_file(fayl_nomi)
 print("O'chirilgandan keyin fayl bormi:", file_exists(fayl_nomi))
+

@@ -5,9 +5,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-blue.svg" alt="Version 0.2.0" />
+  <img src="https://img.shields.io/badge/version-0.3.0-blue.svg" alt="Version 0.3.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/ESM-Native-purple" alt="ESM" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen" alt="Node.js" />
 </p>
 
@@ -26,7 +27,7 @@ Source code (*.mt)
        ↓
       AST           (src/ast.ts)        ──> Sintaktik model
        ↓
-  Interpreter       (src/interpreter.ts + src/runtime.ts) ──> Tree-walk ijro + Modules + I/O
+  Interpreter       (src/interpreter.ts + src/runtime.ts) ──> Tree-walk ijro + Modules + I/O + Exceptions
 ```
 
 ---
@@ -55,15 +56,20 @@ npm run build
 Mitti dastur fayllari `.mt` kengaytmasiga ega bo'ladi:
 
 ```bash
-node dist/main.js examples/modules/main.mt
+node dist/main.js examples/error_handling.mt
 ```
 
 Development rejimida (build qilmasdan to'g'ridan-to'g'ri `tsx` orqali):
 ```bash
-npm run dev examples/modules/main.mt
+npm run dev examples/error_handling.mt
 ```
 
-### 2. Interaktiv REPL (Read-Eval-Print Loop)
+### 2. Tezkor Kod Bajarish (`-e, --eval`)
+```bash
+node dist/main.js -e "print(10 + 20)"
+```
+
+### 3. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
@@ -71,25 +77,28 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.2 — chiqish uchun 'exit' yoki Ctrl+D
+Mitti REPL v0.3 — chiqish uchun 'exit' yoki Ctrl+D
 > x = 10
 10
 > x * 2
 20
-> print("Salom, Mitti!")
-Salom, Mitti!
-> func salom(ism):
-...     return "Salom, " + ism
+> try:
+...     print(10 / 0)
+... except e:
+...     print("Xato:", e)
 ... 
-> salom("Ali")
-Salom, Ali
+Xato: nolga bo'lish mumkin emas
 > exit
 ```
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.2.0)
+## 🌟 Til imkoniyatlari (v0.3.0)
 
+- **Xatolarni boshqarish (Exception Handling)**:
+  - `try / except (e) / finally` bloklari
+  - `raise "Xatolik"` va `throw "Xatolik"` ifodalari
+  - Xato yuz berganda aniq kod qatori va vizual **Call Stack Trace** ko'rsatgichi
 - **Modullar tizimi (Modules)**:
   - `import "./modul.mt" as nom` va `import "./modul.mt"`
   - `from "./modul.mt" import funksiya, o'zgaruvchi as alias`
@@ -110,12 +119,6 @@ Salom, Ali
 - **Lug'at / Obyektlar (Maps/Objects)**: `{key: "value"}`, `obj.key` va `obj["key"]`
 - **Kiritilgan Yordamchi Funksiyalar**:
   - `print`, `len`, `range`, `type`, `str`, `int`, `float`, `push`, `pop`, `keys`, `values`, `has`, `upper`, `lower`, `trim`, `split`, `join`, `abs`, `min`, `max`, `round`, `floor`, `ceil`, `sqrt`, `pow`
-- **24 ta Kiritilgan (Built-in) Funksiyalar**:
-  - *Chiqarish va Turlar*: `print`, `len`, `range`, `type`, `str`, `int`, `float`
-  - *Massivlar*: `push`, `pop`
-  - *Obyektlar*: `keys`, `values`, `has`
-  - *Satrlar*: `upper`, `lower`, `trim`, `split`, `join`
-  - *Matematika*: `abs`, `min`, `max`, `round`, `floor`, `ceil`, `sqrt`, `pow`
 
 ---
 
@@ -200,7 +203,7 @@ Mitti/
 
 - [x] **v0.1.0**: Tree-walk interpreter, Python-uslub sintaksis, 24 built-in funksiya, closures, massiv/obyektlar, CLI & REPL
 - [x] **v0.2.0**: Modullar tizimi (`import`, `from-import`, `as`), standart modullar (`math`, `os`, `json`), fayl I/O (`read_file`, `write_file`, `append_file`, `file_exists`, `remove_file`)
-- [ ] **v0.3.0**: Xatolarni boshqarish (`try / except`), yaxshilangan stacktrace
+- [x] **v0.3.0**: ESM (`"type": "module"`), xatolarni boshqarish (`try / except / finally`), maxsus xatolar (`raise / throw`), vizual Call Stack Trace
 - [ ] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter
 - [ ] **v0.5.0**: LSP (Language Server Protocol) — VS Code kengaytmasi
 - [ ] **v0.6.0**: Bytecode VM — tezlikni oshirish uchun virtual mashina

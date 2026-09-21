@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as A from "./ast";
-import { Lexer } from "./lexer";
-import { Parser } from "./parser";
+import * as A from "./ast.js";
+import { Lexer } from "./lexer.js";
+import { Parser } from "./parser.js";
 import {
   Environment,
   MittiValue,
@@ -10,17 +10,20 @@ import {
   MittiFunction,
   NativeFunction,
   MittiRuntimeError,
+  MittiUserException,
+  CallFrame,
   ReturnSignal,
   BreakSignal,
   ContinueSignal,
   isTruthy,
   stringify,
   typeName,
-} from "./runtime";
+} from "./runtime.js";
 
 export class Interpreter {
   public globals = new Environment();
   public currentFilePath: string | null = null;
+  public callStack: CallFrame[] = [];
   private output: (s: string) => void;
   private moduleCache: Map<string, MittiObject> = new Map();
   private loadingModules: Set<string> = new Set();
@@ -137,6 +140,58 @@ export class Interpreter {
           env.define(moduleName, modObj);
         }
         return;
+      }
+
+      case "TryStmt": {
+        let errorCaught: unknown = null;
+        try {
+          this.execBlock(stmt.tryBlock, new Environment(env));
+        } catch (e) {
+          if (e instanceof ReturnSignal || e instanceof BreakSignal || e instanceof ContinueSignal) {
+            if (stmt.finallyBlock) {
+              this.execBlock(stmt.finallyBlock, new Environment(env));
+            }
+            throw e;
+          }
+          errorCaught = e;
+        }
+
+        if (errorCaught) {
+          if (stmt.exceptBlock) {
+            const exceptEnv = new Environment(env);
+            if (stmt.catchVar) {
+              let errorVal: MittiValue;
+              if (errorCaught instanceof MittiUserException) {
+                errorVal = errorCaught.value;
+              } else if (errorCaught instanceof MittiRuntimeError) {
+                errorVal = errorCaught.rawMessage;
+              } else if (errorCaught instanceof Error) {
+                errorVal = errorCaught.message;
+              } else {
+                errorVal = String(errorCaught);
+              }
+              exceptEnv.define(stmt.catchVar, errorVal);
+            }
+            this.execBlock(stmt.exceptBlock, exceptEnv);
+          } else {
+            if (stmt.finallyBlock) {
+              this.execBlock(stmt.finallyBlock, new Environment(env));
+            }
+            throw errorCaught;
+          }
+        }
+
+        if (stmt.finallyBlock) {
+          this.execBlock(stmt.finallyBlock, new Environment(env));
+        }
+        return;
+      }
+
+      case "RaiseStmt": {
+        const val = this.evalExpr(stmt.argument, env);
+        const exc = new MittiUserException(val, stmt.line);
+        exc.callStack = [...this.callStack];
+        throw exc;
       }
     }
   }
@@ -378,16 +433,24 @@ export class Interpreter {
     for (let i = 0; i < fn.params.length; i++) {
       callEnv.define(fn.params[i], args[i] ?? null);
     }
-    if (args.length > fn.params.length) {
-      // ortiqcha argumentlarga ruxsat beramiz, lekin ular e'tiborga olinmaydi
-    }
+    this.callStack.push({
+      fnName: fn.name ?? "<anonim>",
+      file: this.currentFilePath ?? undefined,
+      line,
+    });
     try {
       this.execBlock(fn.body, callEnv);
     } catch (e) {
       if (e instanceof ReturnSignal) return e.value;
+      if (e instanceof MittiRuntimeError) {
+        if (e.callStack.length === 0) e.callStack = [...this.callStack];
+      } else if (e instanceof MittiUserException) {
+        if (e.callStack.length === 0) e.callStack = [...this.callStack];
+      }
       throw e;
+    } finally {
+      this.callStack.pop();
     }
-    void line;
     return null;
   }
 

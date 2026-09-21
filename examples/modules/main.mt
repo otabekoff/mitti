@@ -34,3 +34,4 @@ import os
 print("OS platform:", os.platform)
 print("OS arxitektura:", os.arch)
 print("Joriy papka:", os.cwd())
+

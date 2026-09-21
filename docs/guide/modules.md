@@ -112,3 +112,4 @@ print(path_val)
 
 - **Module Caching**: Bir fayl bir necha marta yoki turli joylarda `import` qilinsa ham, u faqat bir marta ijro etiladi va xotirada keshlanadi.
 - **Circular Imports**: Agar A moduli B ni, B moduli esa A ni import qilishga harakat qilsa, interpreter darhol tushunarli `Aylanma (circular) import xatosi` beradi.
+

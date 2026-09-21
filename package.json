@@ -1,11 +1,12 @@
 {
   "name": "mitti-lang",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Mitti — oddiy, tez, Python-uslub interpreted programming language",
   "main": "dist/main.js",
   "bin": {
     "mitti": "dist/main.js"
   },
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "tsx src/main.ts",
