@@ -42,6 +42,7 @@ export default defineConfig({
         text: 'Ichki tuzilish (Under the Hood)',
         items: [
           { text: 'Interpreter arxitekturasi', link: '/guide/internals' },
+          { text: 'Bayt-kod VM (Bytecode VM)', link: '/guide/bytecode-vm' },
           { text: "Yo'l xaritasi (Roadmap)", link: '/guide/roadmap' }
         ]
       }
@@ -52,7 +53,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Mitti dasturlash tili — v0.5.0',
+      message: 'Mitti dasturlash tili — v0.6.0',
       copyright: 'Mitti jamoasi tomonidan ochiq manba bilan yaratilgan'
     }
   }

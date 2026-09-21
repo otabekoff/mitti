@@ -8,6 +8,9 @@ import { Interpreter } from "./interpreter.js";
 import { MittiRuntimeError, MittiUserException, MittiTypeError, stringify } from "./runtime.js";
 import { Linter } from "./linter.js";
 import { startLanguageServer } from "./lsp/server.js";
+import { Compiler } from "./vm/compiler.js";
+import { VM } from "./vm/vm.js";
+import { disassemble } from "./vm/disassembler.js";
 
 function runSource(src: string, interp: Interpreter) {
   const tokens = new Lexer(src).tokenize();
@@ -44,7 +47,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.5 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v0.6 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -153,17 +156,19 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
 } else if (args[0] === "-v" || args[0] === "--version") {
-  console.log("Mitti v0.5.0");
+  console.log("Mitti v0.6.0");
 } else if (args[0] === "-h" || args[0] === "--help") {
-  console.log("Mitti dasturlash tili — v0.5.0");
+  console.log("Mitti dasturlash tili — v0.6.0");
   console.log("Ishlatish: mitti [fayl.mt]");
   console.log("Buyruqlar:");
-  console.log("  lint <fayl.mt>   Statik tahlil (linter)");
-  console.log("  lsp              Language Server Protocol (LSP) serverini ishga tushirish");
+  console.log("  lint <fayl.mt>       Statik tahlil (linter)");
+  console.log("  lsp                  Language Server Protocol (LSP) serverini ishga tushirish");
+  console.log("  dis <fayl.mt>        Bayt-kodni ko'rsatish (disassembler)");
   console.log("Variantlar:");
-  console.log("  -e, --eval <code> Kod satrini to'g'ridan-to'g'ri bajarish");
-  console.log("  -v, --version     Versiyani ko'rsatish");
-  console.log("  -h, --help        Yordam");
+  console.log("  --vm <fayl.mt>       Stack-based VM orqali bajarish");
+  console.log("  -e, --eval <code>    Kod satrini to'g'ridan-to'g'ri bajarish");
+  console.log("  -v, --version        Versiyani ko'rsatish");
+  console.log("  -h, --help           Yordam");
 } else if (args[0] === "lsp") {
   startLanguageServer();
 } else if (args[0] === "lint") {
@@ -201,6 +206,63 @@ if (args.length === 0) {
     if (d.level === "xato") hasErrors = true;
   }
   process.exit(hasErrors ? 1 : 0);
+} else if (args[0] === "dis") {
+  // mitti dis <fayl.mt> — bayt-kodni disassemble qilish
+  if (args.length < 2) {
+    console.error("Xato: dis buyrug'i fayl yo'lini talab qiladi");
+    process.exit(1);
+  }
+  const disPath = path.resolve(args[1]);
+  if (!fs.existsSync(disPath)) {
+    console.error(`Xato: fayl topilmadi: ${args[1]}`);
+    process.exit(1);
+  }
+  const disSrc = fs.readFileSync(disPath, "utf-8");
+  try {
+    const disTokens = new Lexer(disSrc).tokenize();
+    const disProgram = new Parser(disTokens).parseProgram();
+    const disChunk = new Compiler("<asosiy>").compile(disProgram);
+    console.log(disassemble(disChunk, args[1]));
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    if (e instanceof MittiRuntimeError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    throw e;
+  }
+} else if (args[0] === "--vm") {
+  // mitti --vm <fayl.mt> — stack-based VM orqali bajarish
+  if (args.length < 2) {
+    console.error("Xato: --vm parametri fayl yo'lini talab qiladi");
+    process.exit(1);
+  }
+  const vmPath = path.resolve(args[1]);
+  if (!fs.existsSync(vmPath)) {
+    console.error(`Xato: fayl topilmadi: ${args[1]}`);
+    process.exit(1);
+  }
+  const vmSrc = fs.readFileSync(vmPath, "utf-8");
+  try {
+    const vmTokens = new Lexer(vmSrc).tokenize();
+    const vmProgram = new Parser(vmTokens).parseProgram();
+    const vmChunk = new Compiler("<asosiy>").compile(vmProgram);
+    const vm = new VM();
+    vm.run(vmChunk);
+  } catch (e) {
+    if (e instanceof MittiSyntaxError) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    if (e instanceof MittiRuntimeError) {
+      console.error(e.formatWithStack(vmPath, vmSrc.split("\n")));
+      process.exit(1);
+    }
+    throw e;
+  }
 } else if (args[0] === "-e" || args[0] === "--eval") {
   if (args.length < 2) {
     console.error("Xato: -e parametri kod satrini talab qiladi");

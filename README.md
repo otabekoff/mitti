@@ -9,8 +9,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.5.0-blue.svg" alt="Version 0.5.0" />
+  <img src="https://img.shields.io/badge/version-0.6.0-blue.svg" alt="Version 0.6.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
+  <img src="https://img.shields.io/badge/VM-Ready-orange.svg" alt="VM Ready" />
   <img src="https://img.shields.io/badge/LSP-Ready-cyan.svg" alt="LSP Ready" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
   <img src="https://img.shields.io/badge/ESM-Native-purple" alt="ESM" />
@@ -81,12 +82,24 @@ VS Code, Neovim yoki Helix bilan real-vaqtda bog'lanuvchi til serverini ishga tu
 node dist/main.js lsp
 ```
 
-### 4. Tezkor Kod Bajarish (`-e, --eval`)
+### 4. Bayt-kod Disassembler (`dis`)
+Kompilyatsiya qilingan bayt-kod instruksiyalarini ko'rish:
+```bash
+node dist/main.js dis examples/hello.mt
+```
+
+### 5. Stack-based Virtual Machine (`--vm`)
+Dasturni Tree-walk o'rniga tezkor Bytecode VM orqali bajarish:
+```bash
+node dist/main.js --vm examples/vm_benchmark.mt
+```
+
+### 6. Tezkor Kod Bajarish (`-e, --eval`)
 ```bash
 node dist/main.js -e "x: int = 10; print(x * 2)"
 ```
 
-### 5. Interaktiv REPL (Read-Eval-Print Loop)
+### 7. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
@@ -94,7 +107,7 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.5 — chiqish uchun 'exit' yoki Ctrl+D
+Mitti REPL v0.6 — chiqish uchun 'exit' yoki Ctrl+D
 > x: int = 10
 10
 > x * 2
@@ -104,8 +117,13 @@ Mitti REPL v0.5 — chiqish uchun 'exit' yoki Ctrl+D
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.5.0)
+## 🌟 Til imkoniyatlari (v0.6.0)
 
+- **Bytecode Compiler va Virtual Machine (VM)**:
+  - AST'ni xotirada ixcham bayt-kod instruksiyalariga (`Chunk`) kompilyatsiya qilish
+  - Stack-based VM — tejamkor xotira boshqaruvi va chaqiruvlar steki (Call Frames)
+  - `mitti dis <fayl.mt>` — inson o'qiy oladigan bayt-kod disassembleri
+  - `mitti --vm <fayl.mt>` — virtual mashinada tezkor ijro
 - **Language Server Protocol (LSP) & Muharrirlar**:
   - `mitti lsp` — standart `stdio` orqali ishlovchi JSON-RPC 2.0 til serveri
   - **Real-vaqt diagnostika**: Sintaktik xatolar, tip nomuvofiqliklari va linter ogohlantirishlari
