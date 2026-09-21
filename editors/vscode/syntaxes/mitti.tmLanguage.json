@@ -1,0 +1,134 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Mitti",
+  "scopeName": "source.mitti",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#constants" },
+    { "include": "#functions" },
+    { "include": "#numbers" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.mitti",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.mitti",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            { "name": "constant.character.escape.mitti", "match": "\\\\." }
+          ]
+        },
+        {
+          "name": "string.quoted.single.mitti",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "name": "constant.character.escape.mitti", "match": "\\\\." }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.mitti",
+          "match": "\\b(if|elif|else|while|for|in|return|break|continue|try|except|finally|raise|throw)\\b"
+        },
+        {
+          "name": "keyword.other.import.mitti",
+          "match": "\\b(import|from|as)\\b"
+        },
+        {
+          "name": "keyword.declaration.mitti",
+          "match": "\\b(func)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.mitti",
+          "match": "\\b(and|or|not)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "entity.name.type.mitti",
+          "match": "\\b(int|float|str|bool|list|obj|any)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.mitti",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.mitti" },
+            "2": { "name": "entity.name.function.mitti" }
+          }
+        },
+        {
+          "name": "support.function.builtin.mitti",
+          "match": "\\b(print|len|range|type|str|int|float|push|pop|keys|values|has|upper|lower|split|join|trim|abs|min|max|round|floor|ceil|sqrt|pow|read_file|write_file|append_file|file_exists|remove_file)\\b"
+        },
+        {
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "entity.name.function.call.mitti" }
+          }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.mitti",
+          "match": "\\b[0-9]+\\.[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.mitti",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arrow.mitti",
+          "match": "->"
+        },
+        {
+          "name": "keyword.operator.comparison.mitti",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.assignment.mitti",
+          "match": "\\+=|-=|\\*=|/=|="
+        },
+        {
+          "name": "keyword.operator.arithmetic.mitti",
+          "match": "\\+|-|\\*|/|%"
+        }
+      ]
+    }
+  }
+}

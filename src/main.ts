@@ -7,6 +7,7 @@ import { Parser } from "./parser.js";
 import { Interpreter } from "./interpreter.js";
 import { MittiRuntimeError, MittiUserException, MittiTypeError, stringify } from "./runtime.js";
 import { Linter } from "./linter.js";
+import { startLanguageServer } from "./lsp/server.js";
 
 function runSource(src: string, interp: Interpreter) {
   const tokens = new Lexer(src).tokenize();
@@ -43,7 +44,7 @@ function runFile(filePath: string) {
 }
 
 function startRepl() {
-  console.log("Mitti REPL v0.4 — chiqish uchun 'exit' yoki Ctrl+D");
+  console.log("Mitti REPL v0.5 — chiqish uchun 'exit' yoki Ctrl+D");
   const interp = new Interpreter();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> " });
 
@@ -152,16 +153,19 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   startRepl();
 } else if (args[0] === "-v" || args[0] === "--version") {
-  console.log("Mitti v0.4.0");
+  console.log("Mitti v0.5.0");
 } else if (args[0] === "-h" || args[0] === "--help") {
-  console.log("Mitti dasturlash tili — v0.4.0");
+  console.log("Mitti dasturlash tili — v0.5.0");
   console.log("Ishlatish: mitti [fayl.mt]");
   console.log("Buyruqlar:");
   console.log("  lint <fayl.mt>   Statik tahlil (linter)");
+  console.log("  lsp              Language Server Protocol (LSP) serverini ishga tushirish");
   console.log("Variantlar:");
   console.log("  -e, --eval <code> Kod satrini to'g'ridan-to'g'ri bajarish");
   console.log("  -v, --version     Versiyani ko'rsatish");
   console.log("  -h, --help        Yordam");
+} else if (args[0] === "lsp") {
+  startLanguageServer();
 } else if (args[0] === "lint") {
   // mitti lint <file.mt>
   if (args.length < 2) {

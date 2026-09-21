@@ -1,0 +1,44 @@
+{
+  "name": "mitti-vscode",
+  "displayName": "Mitti Language Support",
+  "description": "Rasmiy Mitti dasturlash tili uchun sintaksis bo'yash, avtomatik to'ldirish va LSP integratsiyasi",
+  "version": "0.5.0",
+  "publisher": "mitti-lang",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "keywords": [
+    "mitti",
+    "python",
+    "programming language",
+    "lsp"
+  ],
+  "main": "./client.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "mitti",
+        "aliases": ["Mitti", "mitti"],
+        "extensions": [".mt"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icon.png",
+          "dark": "./icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "mitti",
+        "scopeName": "source.mitti",
+        "path": "./syntaxes/mitti.tmLanguage.json"
+      }
+    ]
+  }
+}

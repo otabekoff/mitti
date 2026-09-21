@@ -4,10 +4,12 @@ export default defineConfig({
   title: "Mitti",
   description: "Oddiy, tez va ixcham interpreted dasturlash tili",
   themeConfig: {
+    logo: '/logo.png',
     nav: [
       { text: 'Asosiy', link: '/' },
       { text: "Qo'llanma", link: '/guide/getting-started' },
       { text: 'Funksiyalar', link: '/guide/builtins' },
+      { text: 'LSP & Muharrirlar', link: '/guide/lsp' },
       { text: 'Arxitektura', link: '/guide/internals' }
     ],
 
@@ -22,6 +24,7 @@ export default defineConfig({
           { text: 'Fayllar bilan ishlash (File I/O)', link: '/guide/file-io' },
           { text: 'Xatolarni boshqarish (try/except)', link: '/guide/errors' },
           { text: 'Ixtiyoriy tiplash (Typing)', link: '/guide/typing' },
+          { text: 'LSP va Muharrirlar', link: '/guide/lsp' },
           { text: 'Built-in funksiyalar', link: '/guide/builtins' }
         ]
       },
@@ -39,7 +42,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Mitti dasturlash tili — v0.4.0',
+      message: 'Mitti dasturlash tili — v0.5.0',
       copyright: 'Mitti jamoasi tomonidan ochiq manba bilan yaratilgan'
     }
   }

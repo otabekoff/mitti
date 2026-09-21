@@ -1,12 +1,17 @@
 # Mitti — Oddiy, tez va ixcham dasturlash tili
 
 <p align="center">
+  <img src="./assets/logo.png" width="160" height="160" alt="Mitti Logo" style="border-radius: 28px;" />
+</p>
+
+<p align="center">
   <b>Mitti</b> — TypeScript'da yozilgan, Python-uslub sintaksisga ega, tree-walk interpreter asosidagi zamonaviy va sodda dasturlash tili.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.4.0-blue.svg" alt="Version 0.4.0" />
+  <img src="https://img.shields.io/badge/version-0.5.0-blue.svg" alt="Version 0.5.0" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT" />
+  <img src="https://img.shields.io/badge/LSP-Ready-cyan.svg" alt="LSP Ready" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
   <img src="https://img.shields.io/badge/ESM-Native-purple" alt="ESM" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen" alt="Node.js" />
@@ -70,12 +75,18 @@ Kodni bajarmasdan oldin sintaksis, ishlatilmagan importlar, aniqlanmagan o'zgaru
 node dist/main.js lint examples/typing.mt
 ```
 
-### 3. Tezkor Kod Bajarish (`-e, --eval`)
+### 3. Language Server Protocol (`mitti lsp`)
+VS Code, Neovim yoki Helix bilan real-vaqtda bog'lanuvchi til serverini ishga tushirish:
+```bash
+node dist/main.js lsp
+```
+
+### 4. Tezkor Kod Bajarish (`-e, --eval`)
 ```bash
 node dist/main.js -e "x: int = 10; print(x * 2)"
 ```
 
-### 4. Interaktiv REPL (Read-Eval-Print Loop)
+### 5. Interaktiv REPL (Read-Eval-Print Loop)
 Hech qanday fayl ko'rsatilmasa, interaktiv REPL muhiti ochiladi:
 
 ```bash
@@ -83,24 +94,25 @@ node dist/main.js
 ```
 
 ```text
-Mitti REPL v0.4 — chiqish uchun 'exit' yoki Ctrl+D
+Mitti REPL v0.5 — chiqish uchun 'exit' yoki Ctrl+D
 > x: int = 10
 10
 > x * 2
 20
-> try:
-...     print(10 / 0)
-... except e:
-...     print("Xato:", e)
-... 
-Xato: nolga bo'lish mumkin emas
 > exit
 ```
 
 ---
 
-## 🌟 Til imkoniyatlari (v0.4.0)
+## 🌟 Til imkoniyatlari (v0.5.0)
 
+- **Language Server Protocol (LSP) & Muharrirlar**:
+  - `mitti lsp` — standart `stdio` orqali ishlovchi JSON-RPC 2.0 til serveri
+  - **Real-vaqt diagnostika**: Sintaktik xatolar, tip nomuvofiqliklari va linter ogohlantirishlari
+  - **Intellisense / Autocompletion**: Kalit so'zlar, 24+ built-in funksiya snippetlari va foydalanuvchi funksiya/o'zgaruvchilari
+  - **Hover Ma'lumot**: Funksiya va o'zgaruvchilar ustiga borganda to'liq imzo va turlarni ko'rsatish
+  - **Go to Definition (F12)**: Funksiya yoki o'zgaruvchi e'lon qilingan qatorga bevosita o'tish
+  - **VS Code Extension (`editors/vscode`)**: Rasmiy TextMate sintaksis bo'yash, qavslar va indentatsiya qoidalari
 - **Statik Ixtiyoriy Tiplash (Gradual Typing)**:
   - O'zgaruvchi annotatsiyalari: `x: int = 10`, `nom: str = "Mitti"`, `nisbat: float = 3.14`, `faol: bool = true`, `ro'yxat: list = []`, `sozlama: obj = {}`, `ixtiyoriy: any`
   - Funksiya parametr va return turlari: `func hisob(a: int, b: int) -> int:`
@@ -176,10 +188,14 @@ npm run docs:build
 
 ```text
 Mitti/
+├── assets/               # Loyiha logosi va grafik resurslar
+│   └── logo.png          # Rasmiy Mitti logosi
 ├── docs/                 # VitePress asosidagi to'liq hujjatlar
 │   ├── .vitepress/       # VitePress konfiguratsiyasi
-│   ├── guide/            # Qo'llanmalar (syntax, modules, errors, typing, roadmap)
+│   ├── guide/            # Qo'llanmalar (syntax, modules, errors, typing, lsp, roadmap)
 │   └── index.md          # Hujjatlar bosh sahifasi
+├── editors/              # Matn muharrirlari uchun kengaytmalar
+│   └── vscode/           # Rasmiy VS Code kengaytmasi (TextMate grammar, icon)
 ├── examples/             # Mitti kod namunalari (*.mt)
 │   ├── modules/          # Modullar namunalari (math_utils.mt, main.mt)
 │   ├── error_handling.mt # Xatolarni boshqarish namunasi
@@ -187,6 +203,7 @@ Mitti/
 │   ├── file_io.mt        # Fayllar bilan ishlash namunasi
 │   └── hello.mt          # Asosiy xususiyatlar namunasi
 ├── src/                  # Interpreter manba kodi (TypeScript)
+│   ├── lsp/              # Language Server Protocol (server.ts)
 │   ├── tokens.ts         # Token turlari va kalit so'zlar
 │   ├── lexer.ts          # Lexer (indentatsiya tracking)
 │   ├── ast.ts            # AST tugun interfeyslari (TypedParam, Annotations)
@@ -194,7 +211,7 @@ Mitti/
 │   ├── runtime.ts        # Muhit (Environment), MittiTypeError va checkType()
 │   ├── interpreter.ts    # Tree-walking interpreter + Runtime type checking
 │   ├── linter.ts         # Statik tahlilchi (undefined vars, unused imports, type mismatch)
-│   └── main.ts           # CLI (run, eval, lint) va interaktiv REPL
+│   └── main.ts           # CLI (run, eval, lint, lsp) va interaktiv REPL
 ├── package.json          # Loyiha konfiguratsiyasi va scriptlar
 ├── tsconfig.json         # TypeScript konfiguratsiyasi
 └── README.md             # Loyiha tavsifi
@@ -208,7 +225,7 @@ Mitti/
 - [x] **v0.2.0**: Modullar tizimi (`import`, `from-import`, `as`), standart modullar (`math`, `os`, `json`), fayl I/O (`read_file`, `write_file`, `append_file`, `file_exists`, `remove_file`)
 - [x] **v0.3.0**: ESM (`"type": "module"`), xatolarni boshqarish (`try / except / finally`), maxsus xatolar (`raise / throw`), vizual Call Stack Trace
 - [x] **v0.4.0**: Statik/ixtiyoriy tiplash (Gradual Typing) va linter (`mitti lint`)
-- [ ] **v0.5.0**: LSP (Language Server Protocol) — VS Code kengaytmasi
+- [x] **v0.5.0**: LSP (Language Server Protocol) — `mitti lsp` til serveri va VS Code kengaytmasi
 - [ ] **v0.6.0**: Bytecode VM — tezlikni oshirish uchun virtual mashina
 - [ ] **v1.0.0**: Native va WebAssembly (WASM) kompilyatsiyasi
 

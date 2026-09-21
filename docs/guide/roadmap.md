@@ -8,6 +8,6 @@ Mitti tili bosqichma-bosqich rivojlantirib boriladi. Quyida rejalashtirilgan bos
 | **v0.2** | ✅ Tayyor | Modullar tizimi (`import`, `from-import`, `as`), standart modullar (`math`, `os`, `json`), Fayl I/O (`read_file`, `write_file`, `append_file`, `file_exists`, `remove_file`) |
 | **v0.3** | ✅ Tayyor | ESM (`"type": "module"`), Xatolarni tutish (`try / except / finally`), maxsus xatolar (`raise / throw`), vizual Call Stack Trace |
 | **v0.4** | ✅ Tayyor | Statik ixtiyoriy tiplash (Gradual Typing): `x: int`, `func f(a: str) -> int:`, runtime `MittiTypeError`, `mitti lint` statik tahlilchi |
-| **v0.5** | ⏳ Rejada | LSP (Language Server Protocol) — VS Code plagin va autocompletion |
+| **v0.5** | ✅ Tayyor | LSP (Language Server Protocol) — `mitti lsp` til serveri, VS Code kengaytmasi, TextMate sintaksis va autocompletion |
 | **v0.6** | ⏳ Rejada | Bytecode VM — yuqori tezlik va optimallashgan virtual mashina |
 | **v1.0** | ⏳ Rejada | Native / WebAssembly (WASM) kompilyatsiyasi |
