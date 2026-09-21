@@ -18,3 +18,4 @@ Rasmiy **Mitti** dasturlash tili uchun VS Code kengaytmasi.
 Kengaytmani sinash yoki ishlab chiqish:
 1. Ushbu papkani VS Code'da oching (`code editors/vscode`).
 2. `F5` tugmasini bosib Extension Development Host oynasida yangi `.mt` fayl yaratib tekshiring.
+

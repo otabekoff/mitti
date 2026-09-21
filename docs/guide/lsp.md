@@ -116,3 +116,4 @@ Mitti tilining rasmiy logosi va piktogrammasi:
 <p align="center">
   <img src="/logo.png" width="160" height="160" alt="Mitti Logo" style="border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 240, 255, 0.2);" />
 </p>
+

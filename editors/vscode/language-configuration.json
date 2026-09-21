@@ -1,8 +1,7 @@
 {
   "comments": {
     "lineComment": {
-      "comment": "#",
-      "noIndent": false
+      "comment": "#"
     }
   },
   "brackets": [
@@ -29,3 +28,4 @@
     "decreaseIndentPattern": "^\\s*(elif|else|except|finally)\\b.*:\\s*$"
   }
 }
+
