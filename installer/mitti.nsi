@@ -126,3 +126,4 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mitti"
     DeleteRegKey HKCU "Software\Mitti"
 SectionEnd
+

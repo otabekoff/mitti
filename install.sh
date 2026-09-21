@@ -78,3 +78,4 @@ echo '   export PATH="$HOME/.mitti/bin:$PATH"'
 echo " Then test:"
 echo "   mitti --version"
 echo ""
+

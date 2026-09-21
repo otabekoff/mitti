@@ -71,7 +71,17 @@ code --install-extension mitti-vscode-1.0.0.vsix
 ```
 Yoki VS Code ichida: **Extensions (Ctrl+Shift+X) ➔ `...` (yuqoridagi uch nuqta) ➔ Install from VSIX...**
 
-### 5. Brauzerda o'rnatmasdan sinab ko'rish:
+### 5. Manba kodidan o'rnatish:
+```bash
+git clone https://github.com/otabekoff/mitti.git
+cd mitti
+npm install
+npm run build
+npm link
+mitti --version
+```
+
+### 6. Brauzerda o'rnatmasdan sinab ko'rish:
 Interaktiv muharrir va real-vaqt sintaksis bo'yash: **[Mitti Web Playground](https://otabekoff.github.io/mitti/playground.html)**
 
 ---

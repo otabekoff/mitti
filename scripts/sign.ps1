@@ -67,3 +67,4 @@ finally {
         Remove-Item $tempPfx -Force -ErrorAction SilentlyContinue
     }
 }
+

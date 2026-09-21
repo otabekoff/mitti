@@ -70,3 +70,4 @@ Write-Host " Ishlatish uchun yangi terminal oching va quyidagilarni yozing:"
 Write-Host "   mitti --version" -ForegroundColor Cyan
 Write-Host "   mitti" -ForegroundColor Cyan
 Write-Host ""
+
