@@ -1,8 +1,15 @@
+---
+sidebar: false
+aside: false
+outline: false
+---
+
 <script setup>
 import { ref, computed } from 'vue'
+import { executeMittiInBrowser } from '../src/web/runner.js'
 
 const examples = {
-  fib: `# 1. Fibonacci ketma-ketligi
+  fib: `# 1. Fibonacci ketma-ketligi (Haqiqiy interpreterda ishlaydi)
 func fibonacci(n: int) -> int:
     if n <= 1:
         return n
@@ -12,14 +19,15 @@ print("Fibonacci natijalari (0..9):")
 for i in range(10):
     print(fibonacci(i))`,
 
-  fact: `# 2. Rekursiv faktorial
+  fact: `# 2. Rekursiv faktorial hisoblash
 func factorial(n: int) -> int:
     if n <= 1:
         return 1
     return n * factorial(n - 1)
 
 print("5! =", factorial(5))
-print("7! =", factorial(7))`,
+print("7! =", factorial(7))
+print("10! =", factorial(10))`,
 
   ds: `# 3. Massivlar va Lug'at (Obyektlar)
 foydalanuvchi = {
@@ -28,110 +36,71 @@ foydalanuvchi = {
     kasb: "Dasturchi"
 }
 
-print(foydalanuvchi.ism, "kasbi:", foydalanuvchi.kasb)
+print("Foydalanuvchi:", foydalanuvchi.ism, "—", foydalanuvchi.kasb)
 
 ballar = [85, 92, 78, 96]
 push(ballar, 100)
-print("Ballar soni:", len(ballar))
-print("Barcha ballar:", ballar)`,
+print("Jami ballar soni:", len(ballar))
+print("Ro'yxat:", ballar)`,
 
-  typing: `# 4. Ixtiyoriy tiplash (Gradual Typing)
-func qoshish(a: int, b: int) -> int:
-    return a + b
+  custom: `# 4. O'zingiz xohlagan kodni yozing va sinab ko'ring!
+x = 100
+y = 25
+print("Yig'indi:", x + y)
+print("Ko'paytma:", x * y)
 
-natija: int = qoshish(25, 35)
-print("Yig'indi:", natija)`
+for i in range(5):
+    print("Qadam:", i * 10)`
 }
 
 const selectedExample = ref('fib')
 const code = ref(examples.fib)
 const output = ref("Kodni bajarish uchun '▶ Bajarish' tugmasini bosing...")
 const isRunning = ref(false)
+const lineCount = computed(() => code.value.split('\n').length)
 
 function onSelectExample(key) {
   selectedExample.value = key
   code.value = examples[key]
-  output.value = "Namuna yuklandi. Bajarish uchun '▶ Bajarish' tugmasini bosing."
+  output.value = "Namuna yuklandi. Kodni o'zgartirishingiz va '▶ Bajarish' tugmasini bosishingiz mumkin."
 }
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+function handleTab(e) {
+  const textarea = e.target
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  code.value = code.value.substring(0, start) + "    " + code.value.substring(end)
+  setTimeout(() => {
+    textarea.selectionStart = textarea.selectionEnd = start + 4
+  }, 0)
 }
-
-function highlightMitti(src) {
-  const lines = src.split('\n')
-  return lines.map(line => {
-    // Agar butun qator izoh bo'lsa
-    if (line.trim().startsWith('#')) {
-      return `<span class="cm">${escapeHtml(line)}</span>`
-    }
-
-    // Qator ichidagi inline izohni ajratamiz
-    let codePart = line
-    let commentPart = ''
-    const hashIdx = line.indexOf('#')
-    if (hashIdx !== -1) {
-      codePart = line.substring(0, hashIdx)
-      commentPart = `<span class="cm">${escapeHtml(line.substring(hashIdx))}</span>`
-    }
-
-    // Qatorni tokenizatsiya qilish
-    let res = escapeHtml(codePart)
-
-    // Strings: "..." yoki '...'
-    res = res.replace(/(&quot;.*?&quot;|&#39;.*?&#39;|".*?"|'.*?')/g, '<span class="str">$1</span>')
-
-    // Funksiya e'loni: func name
-    res = res.replace(/\b(func)\s+([a-zA-Z_]\w*)/g, '<span class="kw">$1</span> <span class="fn">$2</span>')
-
-    // Arrow: ->
-    res = res.replace(/(-&gt;)/g, '<span class="op">$1</span>')
-
-    // Tiplar
-    res = res.replace(/\b(int|float|str|bool|list|obj|any)\b/g, '<span class="tp">$1</span>')
-
-    // Kalit so'zlar
-    res = res.replace(/\b(if|elif|else|while|for|in|return|break|continue|try|except|finally|raise|throw|import|from|as|and|or|not)\b/g, '<span class="kw">$1</span>')
-
-    // Konstantalar
-    res = res.replace(/\b(true|false|null)\b/g, '<span class="cst">$1</span>')
-
-    // Built-in funksiyalar
-    res = res.replace(/\b(print|len|range|type|push|pop|keys|values|has|upper|lower|split|join|trim|abs|min|max|round|floor|ceil|sqrt|pow|input)\b(?=\()/g, '<span class="blt">$1</span>')
-
-    // Boshqa funksiya chaqiruvlari: name(...)
-    res = res.replace(/\b([a-zA-Z_]\w*)(?=\()/g, '<span class="cl">$1</span>')
-
-    // Sonlar
-    res = res.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="num">$1</span>')
-
-    return res + commentPart
-  }).join('\n')
-}
-
-const highlighted = computed(() => highlightMitti(code.value))
 
 function runCode() {
   isRunning.value = true
-  output.value = "Bajarilmoqda...\n"
+  const logs = []
+  const startTime = performance.now()
 
-  setTimeout(() => {
-    isRunning.value = false
-    if (selectedExample.value === 'fib') {
-      output.value = `Fibonacci natijalari (0..9):\n0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n\n[Muvaffaqiyatli yakunlandi: 0ms]`
-    } else if (selectedExample.value === 'fact') {
-      output.value = `5! = 120\n7! = 5040\n\n[Muvaffaqiyatli yakunlandi: 0ms]`
-    } else if (selectedExample.value === 'ds') {
-      output.value = `Otabek kasbi: Dasturchi\nBallar soni: 5\nBarcha ballar: [85, 92, 78, 96, 100]\n\n[Muvaffaqiyatli yakunlandi: 0ms]`
-    } else if (selectedExample.value === 'typing') {
-      output.value = `Yig'indi: 60\n\n[Muvaffaqiyatli yakunlandi: 0ms]`
+  try {
+    const res = executeMittiInBrowser(code.value, (line) => {
+      logs.push(line)
+    })
+
+    const elapsed = (performance.now() - startTime).toFixed(1)
+
+    if (res.success) {
+      if (logs.length === 0) {
+        output.value = `[Dastur muvaffaqiyatli bajarildi, lekin hech narsa chop etilmadi (${elapsed}ms)]\n(print() orqali natijani ko'rishingiz mumkin)`
+      } else {
+        output.value = logs.join('\n') + `\n\n[Muvaffaqiyatli yakunlandi: ${elapsed}ms]`
+      }
     } else {
-      output.value = `[Dastur bajarildi]\nNatija: OK`
+      output.value = `[Xatolik yuz berdi (${elapsed}ms)]\n\n${res.error}`
     }
-  }, 120)
+  } catch (err) {
+    output.value = `[Kutilmagan xato]: ${err.message}`
+  } finally {
+    isRunning.value = false
+  }
 }
 
 function clearOutput() {
@@ -139,62 +108,91 @@ function clearOutput() {
 }
 </script>
 
-# Mitti Web Playground
-
-Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ring va natijalarni real vaqtda kuzating.
-
-<div class="playground-box">
-  <div class="playground-header">
-    <div class="header-left">
-      <span class="editor-title">Mitti Muharrir</span>
-      <span class="version-tag">v1.0.0</span>
-    </div>
-    <div class="header-right">
-      <label class="example-label">Namunalar:</label>
-      <select class="example-select" :value="selectedExample" @change="onSelectExample($event.target.value)">
-        <option value="fib">1. Fibonacci rekursiyasi</option>
-        <option value="fact">2. Faktorial hisoblash</option>
-        <option value="ds">3. Massivlar va Lug'at</option>
-        <option value="typing">4. Ixtiyoriy tiplash</option>
-      </select>
+<div class="playground-wrapper">
+  <div class="playground-title-bar">
+    <div>
+      <h1 class="page-title">Mitti Web Playground</h1>
+      <p class="page-desc">Mitti tilidagi istalgan kodni brauzerda to'g'ridan-to'g'ri yozing, tahrirlang va real-vaqtda bajaring.</p>
     </div>
   </div>
 
-  <div class="editor-container">
-    <pre class="highlight-layer" aria-hidden="true"><code v-html="highlighted"></code></pre>
-    <textarea
-      v-model="code"
-      class="editor-textarea"
-      spellcheck="false"
-      autocomplete="off"
-      autocapitalize="off"
-      autocorrect="off"
-      rows="14"
-    ></textarea>
-  </div>
+  <div class="playground-box">
+    <div class="playground-header">
+      <div class="header-left">
+        <span class="editor-title">Muharrir</span>
+        <span class="status-tag">Real Interpreter</span>
+        <span class="version-tag">v1.0.0</span>
+      </div>
+      <div class="header-right">
+        <label class="example-label">Namunalar:</label>
+        <select class="example-select" :value="selectedExample" @change="onSelectExample($event.target.value)">
+          <option value="fib">1. Fibonacci rekursiyasi</option>
+          <option value="fact">2. Faktorial hisoblash</option>
+          <option value="ds">3. Massivlar va Lug'at</option>
+          <option value="custom">4. Erkin sinash</option>
+        </select>
+      </div>
+    </div>
 
-  <div class="toolbar">
-    <button class="btn-run" @click="runCode" :disabled="isRunning">
-      ▶ Bajarish
-    </button>
-    <button class="btn-clear" @click="clearOutput">
-      Tozalash
-    </button>
-  </div>
+    <!-- Real code editor with line numbers and zero cursor mismatch -->
+    <div class="editor-main">
+      <div class="line-numbers" aria-hidden="true">
+        <div v-for="n in lineCount" :key="n">{{ n }}</div>
+      </div>
+      <textarea
+        v-model="code"
+        class="real-code-editor"
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        @keydown.tab.prevent="handleTab"
+        rows="16"
+        placeholder="Mitti kodingizni bu yerga yozing..."
+      ></textarea>
+    </div>
 
-  <div class="terminal-box">
-    <div class="terminal-title">Terminal Chiqishi:</div>
-    <pre class="terminal-output">{{ output }}</pre>
+    <div class="toolbar">
+      <button class="btn-run" @click="runCode" :disabled="isRunning">
+        {{ isRunning ? 'Bajarilmoqda...' : '▶ Bajarish' }}
+      </button>
+      <button class="btn-clear" @click="clearOutput">
+        Tozalash
+      </button>
+    </div>
+
+    <div class="terminal-box">
+      <div class="terminal-title">Terminal Chiqishi (Haqiqiy stdout):</div>
+      <pre class="terminal-output">{{ output }}</pre>
+    </div>
   </div>
 </div>
 
 <style>
+.playground-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px 0 40px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.page-desc {
+  font-size: 15px;
+  color: var(--vp-c-text-2);
+  margin: 0 0 20px;
+}
+
 .playground-box {
-  margin-top: 24px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   padding: 20px;
   background: var(--vp-c-bg-soft);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .playground-header {
@@ -217,10 +215,19 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
   font-size: 15px;
 }
 
+.status-tag {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(35, 134, 54, 0.2);
+  color: #3fb950;
+  font-weight: 600;
+}
+
 .version-tag {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 10px;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 6px;
   background: var(--vp-c-brand-soft);
   color: var(--vp-c-brand-1);
   font-weight: 600;
@@ -238,7 +245,7 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
 }
 
 .example-select {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
@@ -248,63 +255,53 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
   cursor: pointer;
 }
 
-.editor-container {
-  position: relative;
-  width: 100%;
-  min-height: 280px;
-  background: #161b22;
+.editor-main {
+  display: flex;
+  background: #0d1117;
   border: 1px solid #30363d;
   border-radius: 8px;
   overflow: hidden;
+  min-height: 320px;
 }
 
-.highlight-layer,
-.editor-textarea {
-  margin: 0;
-  padding: 16px;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 14px;
+.line-numbers {
+  width: 44px;
+  padding: 16px 0;
+  background: #090d13;
+  color: #484f58;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
   line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid #21262d;
   box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  min-height: 280px;
 }
 
-.highlight-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+.line-numbers div {
+  padding-right: 10px;
+}
+
+.real-code-editor {
+  flex: 1;
   background: transparent;
   color: #e6edf3;
-  z-index: 0;
-}
-
-.editor-textarea {
-  position: relative;
-  z-index: 1;
-  background: transparent;
-  color: transparent;
   caret-color: #58a6ff;
   border: none;
   outline: none;
+  padding: 16px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
   resize: vertical;
+  white-space: pre;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
-/* Syntax Highlighting ranglari */
-.cm { color: #8b949e; font-style: italic; }
-.str { color: #a5d6ff; }
-.kw { color: #ff7b72; font-weight: 600; }
-.fn { color: #d2a8ff; font-weight: 600; }
-.cl { color: #79c0ff; }
-.blt { color: #ffa657; font-weight: 600; }
-.tp { color: #7ee787; font-weight: 600; }
-.cst { color: #ff7b72; }
-.num { color: #79c0ff; }
-.op { color: #ff7b72; }
+.real-code-editor::placeholder {
+  color: #484f58;
+}
 
 .toolbar {
   margin-top: 14px;
@@ -316,16 +313,24 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
   background: var(--vp-c-brand-1);
   color: #fff;
   border: none;
-  padding: 8px 20px;
+  padding: 8px 22px;
   border-radius: 6px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: opacity 0.2s;
 }
 
 .btn-run:hover {
   opacity: 0.9;
+}
+
+.btn-run:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-clear {
@@ -339,7 +344,7 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
 }
 
 .terminal-box {
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .terminal-title {
@@ -350,45 +355,18 @@ Mitti dasturlash tilidagi kodlarni brauzeringizda to'g'ridan-to'g'ri sinab ko'ri
 }
 
 .terminal-output {
-  background: #0d1117;
+  background: #090d13;
   color: #3fb950;
   padding: 14px 16px;
   border: 1px solid #30363d;
   border-radius: 8px;
-  min-height: 90px;
-  max-height: 220px;
+  min-height: 100px;
+  max-height: 260px;
   overflow-y: auto;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
+  line-height: 1.5;
   margin: 0;
   white-space: pre-wrap;
 }
 </style>
-
----
-
-## Foydali namunalar
-
-### 1. Funksiyalar va rekursiya
-
-```mitti
-func factorial(n: int) -> int:
-    if n <= 1:
-        return 1
-    return n * factorial(n - 1)
-
-print(factorial(5)) # 120
-```
-
-### 2. Lug'atlar va massivlar
-
-```mitti
-talaba = {
-    ism: "Otabek",
-    yosh: 22,
-    kurs: 4,
-    fanlar: ["Dasturlash", "Algoritmlar"]
-}
-
-print(talaba.ism, "o'qiydi:", talaba.fanlar)
-```
