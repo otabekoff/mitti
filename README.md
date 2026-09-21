@@ -45,7 +45,7 @@ Tizimingizda [Node.js](https://nodejs.org) (v18+) o'rnatilgan bo'lishi lozim.
 
 ```bash
 # Repozitoriyani yuklab oling
-git clone <repo-url>
+git clone https://github.com/mitti-lang/mitti.git
 cd Mitti
 
 # Bog'liqliklarni o'rnating
@@ -188,7 +188,7 @@ Mitti REPL v1.0 — chiqish uchun 'exit' yoki Ctrl+D
 
 ## 📝 Sintaksis namunasi
 
-```python
+```mitti
 # Tip annotatsiyalari bilan funksiya
 func factorial(n: int) -> int:
     if n <= 1:

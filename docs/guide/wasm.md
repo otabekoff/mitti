@@ -65,3 +65,4 @@ console.log(instance.exports.fibonacci(10)); // 55
 - Sikllar (`while`, `loop`)
 - Rekursiv funksiya chaqiruvlari
 - Host muhit bilan integratsiya (`env.print`)
+

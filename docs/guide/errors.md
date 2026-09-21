@@ -1,4 +1,4 @@
-# Xatolarni Boshqarish (Error Handling)
+﻿# Xatolarni Boshqarish (Error Handling)
 
 Mitti v0.3.0 versiyasida dasturdagi kutilmagan xatoliklarni xavfsiz tutish, tahlil qilish va maxsus istisnolarni (exceptions) otish uchun to'liq mexanizm yaratildi.
 
@@ -8,7 +8,7 @@ Mitti v0.3.0 versiyasida dasturdagi kutilmagan xatoliklarni xavfsiz tutish, tahl
 
 Dastur bajarilishida xatolik sodir bo'lishi mumkin bo'lgan kod qismi `try` bloki ichiga olinadi. Agar xatolik yuz bersa, boshqaruv `except` blokiga o'tadi:
 
-```python
+```mitti
 try:
     a = 10
     b = 0
@@ -26,7 +26,7 @@ except xato:
 
 `finally` bloki xatolik yuz berishidan yoki bermasligidan qat'i nazar, **har doim** bajariladi. Bu odatda ochiq fayllarni yopish, tarmoq ulanishlarini tozalash yoki resurslarni ozod qilish uchun ishlatiladi:
 
-```python
+```mitti
 ochiq = true
 try:
     print("Resurs bilan ish boshlandi...")
@@ -44,7 +44,7 @@ finally:
 
 Dasturchi o'z shartlari bajarilmaganda xatolik tashlashi mumkin. Buning uchun `raise` (yoki `throw`) kalit so'zi ishlatiladi:
 
-```python
+```mitti
 func yoshni_tekshir(yosh):
     if yosh < 0:
         raise "Yosh manfiy bo'lishi mumkin emas!"

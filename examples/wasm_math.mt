@@ -25,3 +25,4 @@ while i <= 10:
     total += i
     i += 1
 print(total)
+

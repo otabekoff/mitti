@@ -1,4 +1,4 @@
-# Modullar Tizimi (Modules)
+﻿# Modullar Tizimi (Modules)
 
 Mitti v0.2.0 versiyasida to'liq modullar tizimi joriy etildi. Siz o'z kodingizni bir nechta fayllarga ajratishingiz, lokal fayllarni import qilishingiz yoki standart kiritilgan modullardan foydalanishingiz mumkin.
 
@@ -10,7 +10,7 @@ Mitti fayllari `.mt` kengaytmasiga ega. Boshqa fayldan funksiya yoki o'zgaruvchi
 
 ### A) To'liq modulni obyekt sifatida import qilish (`import ... as ...`)
 
-```python
+```mitti
 # matematika.mt fayli:
 PI = 3.14159
 func kvadrat(x):
@@ -18,7 +18,7 @@ func kvadrat(x):
 ```
 
 Asosiy faylda:
-```python
+```mitti
 import "./matematika.mt" as mat
 
 print(mat.PI)          # 3.14159
@@ -26,14 +26,14 @@ print(mat.kvadrat(6))  # 36
 ```
 
 > **Eslatma**: Agar `as` ko'rsatilmasa, fayl nomi (kengaytmasiz) avtomatik o'zgaruvchi nomi sifatida olinadi:
-> ```python
+> ```mitti
 > import "./matematika.mt"
 > print(matematika.PI)
 > ```
 
 ### B) Tanlangan qismlarni import qilish (`from ... import ...`)
 
-```python
+```mitti
 from "./matematika.mt" import kvadrat, PI
 
 print(PI)
@@ -41,7 +41,7 @@ print(kvadrat(5)) # 25
 ```
 
 Nomlar to'qnashuvining oldini olish uchun `as` bilan qayta nomlash (alias) mumkin:
-```python
+```mitti
 from "./matematika.mt" import kvadrat as sq
 
 print(sq(9)) # 81
@@ -56,7 +56,7 @@ Mitti tilida tayyor yordamchi standart modullar mavjud:
 ### 1) `math` Moduli
 Matematik o'zgarmaslar va funksiyalar to'plami.
 
-```python
+```mitti
 import math
 
 print(math.pi)        # 3.141592653589793
@@ -72,7 +72,7 @@ print(math.random())  # 0 va 1 oralig'idagi tasodifiy son
 ### 2) `json` Moduli
 JSON ma'lumotlarini tahlil qilish (parse) va matnga aylantirish (stringify).
 
-```python
+```mitti
 import json
 
 talaba = {
@@ -94,7 +94,7 @@ print(qayta.fanlar[0]) # Fizika
 ### 3) `os` Moduli
 Operatsion tizim va muhit haqida ma'lumot olish.
 
-```python
+```mitti
 import os
 
 print(os.platform)  # win32 / linux / darwin

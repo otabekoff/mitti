@@ -1,4 +1,4 @@
----
+﻿---
 layout: home
 
 hero:
@@ -33,7 +33,7 @@ features:
 
 ## Tezkor namuna
 
-```python
+```mitti
 func salom_ber(ism):
     return "Salom, " + ism + "!"
 

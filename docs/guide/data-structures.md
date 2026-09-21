@@ -1,4 +1,4 @@
-# Ma'lumot Tuzilmalari: Massivlar va Lug'atlar
+﻿# Ma'lumot Tuzilmalari: Massivlar va Lug'atlar
 
 Mitti dasturlash tilida ma'lumotlarni guruhlash uchun ikkita asosiy struktura mavjud: **Massivlar (Arrays)** va **Lug'atlar/Obyektlar (Maps/Objects)**.
 
@@ -8,7 +8,7 @@ Mitti dasturlash tilida ma'lumotlarni guruhlash uchun ikkita asosiy struktura ma
 
 Massivlar to'rtburchak qavs `[...]` orqali yaratiladi:
 
-```python
+```mitti
 sonlar = [10, 20, 30, 40, 50]
 aralash = [1, "salom", true, [2, 3]]
 ```
@@ -16,7 +16,7 @@ aralash = [1, "salom", true, [2, 3]]
 ### Indekslash
 Indekslash 0 dan boshlanadi:
 
-```python
+```mitti
 print(sonlar[0]) # 10
 print(sonlar[2]) # 30
 ```
@@ -24,13 +24,13 @@ print(sonlar[2]) # 30
 ### Manfiy (Negative) Indekslash
 Python kabi, massivning oxiridan hisoblash uchun manfiy indekslardan foydalanish mumkin:
 
-```python
+```mitti
 print(sonlar[-1]) # 50 (oxirgi element)
 print(sonlar[-2]) # 40 (oxiridan ikkinchi element)
 ```
 
 ### Elementni o'zgartirish
-```python
+```mitti
 sonlar[1] = 99
 print(sonlar) # [10, 99, 30, 40, 50]
 ```
@@ -40,7 +40,7 @@ print(sonlar) # [10, 99, 30, 40, 50]
 - `push(arr, qiymat)` — oxiriga element qo'shish
 - `pop(arr)` — oxirgi elementni sug'urib olish (o'chirish va qaytarish)
 
-```python
+```mitti
 royxat = [1, 2]
 push(royxat, 3)
 print(royxat) # [1, 2, 3]
@@ -56,7 +56,7 @@ print(royxat) # [1, 2]
 
 Obyektlar jingalak qavs `{...}` orqali kalit-qiymat ko'rinishida hosil qilinadi:
 
-```python
+```mitti
 foydalanuvchi = {
     ism: "Ali",
     yosh: 25,
@@ -67,16 +67,16 @@ foydalanuvchi = {
 ### Xususiyatlarga murojaat qilish
 Ikki xil usulda murojaat qilish mumkin:
 1. **Nuqta orqali (`obj.prop`)**:
-   ```python
+   ```mitti
    print(foydalanuvchi.ism) # Ali
    ```
 2. **Kvadrat qavs orqali (`obj["prop"]`)**:
-   ```python
+   ```mitti
    print(foydalanuvchi["yosh"]) # 25
    ```
 
 ### Xususiyat qo'shish yoki o'zgartirish
-```python
+```mitti
 foydalanuvchi.kasb = "Muhandis"
 foydalanuvchi["yosh"] = 26
 print(foydalanuvchi)
@@ -87,7 +87,7 @@ print(foydalanuvchi)
 - `values(obj)` — barcha qiymatlar ro'yxati
 - `has(obj, "kalit")` — berilgan kalit mavjudligini tekshirish (`true`/`false`)
 
-```python
+```mitti
 kitob = {
     nomi: "Dunyoning ishlari",
     muallif: "O'tkir Hoshimov"

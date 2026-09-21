@@ -134,3 +134,4 @@ export function createSection(sectionId: WasmSection, content: number[]): number
   const len = encodeULEB128(content.length);
   return [sectionId, ...len, ...content];
 }
+

@@ -1,4 +1,4 @@
-# Sintaksis va Asosiy Tushunchalar
+﻿# Sintaksis va Asosiy Tushunchalar
 
 Mitti tili Python kabi **indentatsiya** (bo'sh joylar / tablar) yordamida bloklarni ajratadi. Qavslar (`{}`) shart emas.
 
@@ -8,7 +8,7 @@ Mitti tili Python kabi **indentatsiya** (bo'sh joylar / tablar) yordamida blokla
 
 Izohlar `#` belgisi bilan boshlanadi:
 
-```python
+```mitti
 # Bu bir qatorli izoh
 x = 10 # Qator oxiridagi izoh
 ```
@@ -24,7 +24,7 @@ Mitti quyidagi asosiy turlarni qo'llab-quvvatlaydi:
 - **Mantiqiy (`boolean`)**: `true` yoki `false`
 - **Null**: `null` (qiymat yo'qligini bildiradi)
 
-```python
+```mitti
 a = 100
 pi = 3.1415
 matn = "Mitti tili"
@@ -46,7 +46,7 @@ hech_nima = null
 ### Murakkab tenglash (Compound Assignment):
 `+=`, `-=`, `*=`, `/=`
 
-```python
+```mitti
 x = 10
 x += 5   # 15
 x *= 2   # 30
@@ -65,7 +65,7 @@ x *= 2   # 30
 - `or` (mantiqiy YOKI)
 - `not` (mantiqiy INKOR)
 
-```python
+```mitti
 if x > 0 and not faol:
     print("Shart bajarildi")
 ```
@@ -76,7 +76,7 @@ if x > 0 and not faol:
 
 Shartli tekshiruvlar `:` va blok indentatsiyasi bilan yoziladi:
 
-```python
+```mitti
 baho = 85
 
 if baho >= 90:
@@ -96,7 +96,7 @@ else:
 ### `while` sikli
 Shart to'g'ri bo'lib turguncha takrorlanadi:
 
-```python
+```mitti
 count = 0
 while count < 5:
     print(count)
@@ -106,7 +106,7 @@ while count < 5:
 ### `for ... in ...` sikli
 Massivlar yoki `range()` orqali iteratsiya qilish:
 
-```python
+```mitti
 for i in range(5):
     print(i) # 0, 1, 2, 3, 4
 
@@ -119,7 +119,7 @@ for meva in mevalar:
 - `break` — siklni zudlik bilan to'xtatadi.
 - `continue` — joriy iteratsiyani o'tkazib yuboradi va keyingi qadamga o'tadi.
 
-```python
+```mitti
 for i in range(10):
     if i == 3:
         continue # 3 ni tashlab o'tadi
@@ -134,7 +134,7 @@ for i in range(10):
 
 Funksiyalar `func nom(parametrlar):` ko'rinishida e'lon qilinadi va `return` orqali natija qaytaradi:
 
-```python
+```mitti
 func qosh(a, b):
     return a + b
 
@@ -145,7 +145,7 @@ print(natija) # 30
 ### Rekursiya
 Funksiyalar o'z-o'zini chaqira oladi:
 
-```python
+```mitti
 func faktorial(n):
     if n <= 1:
         return 1
@@ -157,7 +157,7 @@ print(faktorial(5)) # 120
 ### Lexical Scope & Closures (Yopiq funksiyalar)
 Mitti funksiyalari yuqori tartibli (first-class) hisoblanadi va tashqi qamrovdagi (scope) o'zgaruvchilarni saqlab qoladi:
 
-```python
+```mitti
 func yaratuvi(boshlangich):
     func oshir(qadam):
         return boshlangich + qadam

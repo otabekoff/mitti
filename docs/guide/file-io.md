@@ -1,4 +1,4 @@
-# Fayllar bilan Ishlash (File I/O)
+﻿# Fayllar bilan Ishlash (File I/O)
 
 Mitti v0.2.0 versiyasida fayl tizimi bilan to'g'ridan-to'g'ri ishlash uchun qulay va sinxron funksiyalar qo'shildi.
 
@@ -18,7 +18,7 @@ Mitti v0.2.0 versiyasida fayl tizimi bilan to'g'ridan-to'g'ri ishlash uchun qula
 
 ## 2. Ishlatish Namunasi
 
-```python
+```mitti
 fayl = "kundalik.txt"
 
 # 1. Yangi fayl yaratish va yozish

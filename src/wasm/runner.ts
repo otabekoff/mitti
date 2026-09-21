@@ -25,3 +25,4 @@ export async function runWasm(
 
   return { exports, exitCode };
 }
+

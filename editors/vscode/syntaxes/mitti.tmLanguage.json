@@ -5,10 +5,13 @@
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
+    { "include": "#function-declarations" },
+    { "include": "#function-calls" },
+    { "include": "#builtins" },
     { "include": "#keywords" },
     { "include": "#types" },
     { "include": "#constants" },
-    { "include": "#functions" },
+    { "include": "#properties" },
     { "include": "#numbers" },
     { "include": "#operators" }
   ],
@@ -41,18 +44,51 @@
         }
       ]
     },
+    "function-declarations": {
+      "patterns": [
+        {
+          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "storage.type.function.mitti" },
+            "2": { "name": "entity.name.function.mitti" }
+          }
+        }
+      ]
+    },
+    "function-calls": {
+      "patterns": [
+        {
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "entity.name.function.call.mitti" }
+          }
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.mitti",
+          "match": "\\b(print|len|range|type|str|int|float|push|pop|keys|values|has|upper|lower|split|join|trim|abs|min|max|round|floor|ceil|sqrt|pow|read_file|write_file|append_file|file_exists|remove_file|input)\\b"
+        }
+      ]
+    },
     "keywords": {
       "patterns": [
         {
+          "name": "keyword.control.flow.mitti",
+          "match": "\\b(return|break|continue)\\b"
+        },
+        {
           "name": "keyword.control.mitti",
-          "match": "\\b(if|elif|else|while|for|in|return|break|continue|try|except|finally|raise|throw)\\b"
+          "match": "\\b(if|elif|else|while|for|in|try|except|finally|raise|throw)\\b"
         },
         {
           "name": "keyword.other.import.mitti",
           "match": "\\b(import|from|as)\\b"
         },
         {
-          "name": "keyword.declaration.mitti",
+          "name": "storage.type.function.mitti",
           "match": "\\b(func)\\b"
         },
         {
@@ -64,7 +100,7 @@
     "types": {
       "patterns": [
         {
-          "name": "entity.name.type.mitti",
+          "name": "support.type.primitive.mitti",
           "match": "\\b(int|float|str|bool|list|obj|any)\\b"
         }
       ]
@@ -77,23 +113,18 @@
         }
       ]
     },
-    "functions": {
+    "properties": {
       "patterns": [
         {
-          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "match": "(?<=\\.)([a-zA-Z_][a-zA-Z0-9_]*)",
           "captures": {
-            "1": { "name": "keyword.declaration.mitti" },
-            "2": { "name": "entity.name.function.mitti" }
+            "1": { "name": "variable.other.property.mitti" }
           }
         },
         {
-          "name": "support.function.builtin.mitti",
-          "match": "\\b(print|len|range|type|str|int|float|push|pop|keys|values|has|upper|lower|split|join|trim|abs|min|max|round|floor|ceil|sqrt|pow|read_file|write_file|append_file|file_exists|remove_file)\\b"
-        },
-        {
-          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=:)",
           "captures": {
-            "1": { "name": "entity.name.function.call.mitti" }
+            "1": { "name": "support.type.property-name.mitti" }
           }
         }
       ]
@@ -132,4 +163,3 @@
     }
   }
 }
-
