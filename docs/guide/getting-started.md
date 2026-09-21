@@ -12,7 +12,7 @@ Mitti — interpretatsiya qilinuvchi, o'rganish oson bo'lgan, Python uslubidagi 
 Loyihani yuklab oling va bog'liqliklarni o'rnating:
 
 ```bash
-git clone https://github.com/mitti-lang/mitti.git
+git clone https://github.com/otabekoff/mitti.git
 cd Mitti
 npm install
 ```

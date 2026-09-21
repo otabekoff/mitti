@@ -51,7 +51,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com' }
+      { icon: 'github', link: 'https://github.com/otabekoff/mitti' }
     ],
 
     footer: {

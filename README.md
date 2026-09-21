@@ -43,16 +43,19 @@ Source code (*.mt)
 
 Tizimingizda [Node.js](https://nodejs.org) (v18+) o'rnatilgan bo'lishi lozim.
 
+### Global o'rnatish (Terminalda to'g'ridan-to'g'ri ishlatish uchun):
 ```bash
-# Repozitoriyani yuklab oling
-git clone https://github.com/mitti-lang/mitti.git
-cd Mitti
+npm install -g otabekoff/mitti
+mitti --version
+```
 
-# Bog'liqliklarni o'rnating
+Yoki manba kodidan:
+```bash
+git clone https://github.com/otabekoff/mitti.git
+cd mitti
 npm install
-
-# TypeScript loyihasini kompilyatsiya qiling
 npm run build
+npm link
 ```
 
 ---
